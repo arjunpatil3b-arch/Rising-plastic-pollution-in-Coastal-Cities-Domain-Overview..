@@ -1,0 +1,1525 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>COAST//TRACE — Rising Plastic Pollution in Coastal Cities</title>
+<meta name="description" content="A competition-ready data interface exploring plastic pollution and ocean emissions around the world.">
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&family=Syne:wght@600;700;800&display=swap');
+:root{
+  --bg:#f3f1eb;
+  --panel:#f8f6f1;
+  --ink:#1b1e22;
+  --muted:#5c636c;
+  --line:#d0cbc2;
+  --orange:#1f4a53;
+  --orange2:#2c6670;
+  --blue:#1a3340;
+  --green:#3e564e;
+  --white:#fbfaf6;
+  --shadow:0 12px 28px rgba(27,30,34,.06);
+}
+*{box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{
+  margin:0;background:var(--bg);color:var(--ink);
+  font-family:"Space Mono",ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;
+  overflow-x:hidden;
+}
+body:before{
+  content:"";position:fixed;inset:0;pointer-events:none;z-index:50;opacity:.22;
+  background-image:
+    radial-gradient(ellipse 80% 40% at 80% -10%, rgba(31,74,83,.07), transparent 55%),
+    linear-gradient(180deg, transparent 0%, transparent 92%, rgba(31,74,83,.05) 100%);
+}
+.tidebar{
+  height:10px;width:100%;
+  background:
+    repeating-linear-gradient(-18deg, transparent 0 10px, rgba(31,74,83,.12) 10px 11px),
+    linear-gradient(90deg,#d7e2e4 0%, #1f4a53 42%, #1a3340 100%);
+  opacity:.85;
+}
+.pathstrip{
+  display:grid;grid-template-columns:repeat(4,1fr);border-bottom:1px solid var(--line);
+}
+.pathstrip div{padding:16px 18px;border-right:1px solid var(--line);font-size:10px;line-height:1.5;color:var(--muted)}
+.pathstrip div:last-child{border-right:0}
+.pathstrip b{display:block;font-family:Syne,sans-serif;color:var(--ink);font-size:13px;letter-spacing:-.03em;margin-bottom:4px}
+.wavediv{
+  height:28px;border-bottom:1px solid var(--line);overflow:hidden;
+  background:linear-gradient(180deg,transparent 40%, rgba(31,74,83,.06) 100%);
+}
+.wavediv svg{display:block;width:100%;height:28px}
+a{color:inherit;text-decoration:none}
+button,input,select{font:inherit}
+button{cursor:pointer}
+.wrap{max-width:1500px;margin:auto;padding:0 28px}
+.nav{
+  position:sticky;top:0;z-index:40;background:rgba(243,241,235,.92);
+  backdrop-filter:blur(12px);border-bottom:1px solid var(--line);
+}
+.navin{height:82px;display:grid;grid-template-columns:250px 1fr auto;align-items:center;gap:28px}
+.brand{display:flex;align-items:center;gap:13px;font-weight:700}
+.brandmark{
+  width:44px;height:44px;border:1.5px solid var(--ink);border-radius:2px;
+  display:grid;place-items:center;position:relative;background:var(--bg);
+}
+.brandmark:before,.brandmark:after{content:"";width:5px;height:5px;background:var(--ink);border-radius:50%;position:absolute;top:14px}
+.brandmark:before{left:11px}.brandmark:after{right:11px}
+.brand small{display:block;color:var(--muted);font-size:10px;letter-spacing:.08em}
+.brand strong{font-family:Syne,sans-serif;font-size:19px;letter-spacing:-.05em}
+.links{display:flex;justify-content:center;gap:30px;font-size:12px}
+.links a{position:relative}
+.links a:after{content:"";position:absolute;left:0;bottom:-8px;width:0;height:2px;background:var(--orange);transition:.25s}
+.links a:hover:after{width:100%}
+.cta{
+  background:var(--ink);border:1px solid var(--ink);padding:14px 20px;
+  border-radius:2px;font-weight:700;font-size:11px;transition:.2s;color:#fff
+}
+.cta:hover{background:#111;transform:translateY(-1px)}
+.hero{
+  border-bottom:1px solid var(--line);position:relative;overflow:hidden;
+}
+.hero-grid{display:grid;grid-template-columns:1.05fr .95fr;min-height:660px}
+.hero-copy{padding:80px 50px 75px 0;border-right:1px solid var(--line);display:flex;flex-direction:column;justify-content:center}
+.kicker{font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:var(--orange);font-weight:700;margin-bottom:22px}
+h1{
+  font-family:Syne,sans-serif;font-size:clamp(58px,7.2vw,125px);
+  line-height:.82;letter-spacing:-.075em;margin:0 0 30px;max-width:850px;
+}
+.hero-copy p{font-size:15px;line-height:1.8;max-width:620px;color:#343434;margin:0 0 30px}
+.hero-actions{display:flex;gap:12px;flex-wrap:wrap}
+.btn{
+  border:1px solid var(--ink);background:transparent;padding:15px 18px;border-radius:7px;font-size:11px;font-weight:700
+}
+.btn.dark{background:var(--ink);color:var(--white)}
+.btn:hover{transform:translateY(-2px)}
+.hero-art{position:relative;min-height:660px;padding:40px 10px 70px;display:flex;align-items:center;justify-content:center}
+.shore{
+  width:min(520px,92%);
+}
+.shore svg{display:block;width:100%;height:auto}
+.hero-note{position:absolute;left:32px;bottom:28px;font-size:10px;color:var(--muted);line-height:1.7}
+.hero-code{position:absolute;right:25px;top:28px;font-size:10px;writing-mode:vertical-rl;color:#6b7178;letter-spacing:.16em}
+
+.ticker{border-bottom:1px solid var(--line);overflow:hidden;white-space:nowrap}
+.ticker span{display:inline-block;padding:14px 0;font-size:10px;letter-spacing:.12em;text-transform:uppercase;animation:marquee 22s linear infinite}
+@keyframes marquee{to{transform:translateX(-40%)}}
+.section{padding:56px 0;border-bottom:1px solid var(--line)}
+#global{padding-bottom:28px}
+#explorer{padding-top:28px}
+.section-head{display:flex;justify-content:space-between;gap:30px;align-items:end;margin-bottom:34px}
+.eyebrow{font-size:10px;color:var(--orange);font-weight:700;letter-spacing:.12em}
+.section h2{font-family:Syne,sans-serif;font-size:clamp(34px,5vw,72px);letter-spacing:-.06em;line-height:.9;margin:10px 0 0}
+.section-head p{max-width:470px;color:var(--muted);font-size:12px;line-height:1.7;margin:0}
+.grid4{display:grid;grid-template-columns:repeat(4,1fr);border-top:1px solid var(--line);border-left:1px solid var(--line)}
+.metric{min-height:190px;padding:25px;border-right:1px solid var(--line);border-bottom:1px solid var(--line);background:rgba(250,250,247,.35)}
+.metric .n{font-family:Syne,sans-serif;font-size:46px;letter-spacing:-.06em;margin:20px 0 10px}
+.metric .l{font-size:10px;text-transform:uppercase;color:var(--muted);line-height:1.5}
+.metric .tag{font-size:9px;padding:5px 8px;border:1px solid var(--line);border-radius:20px;display:inline-block}
+.split{display:grid;grid-template-columns:1fr;gap:0;border:1px solid var(--line)}
+.panel{padding:30px;background:rgba(250,250,247,.52);min-width:0;overflow:hidden}
+.panel + .panel{border-left:0;border-top:1px solid var(--line)}
+.panel-title{display:flex;justify-content:space-between;align-items:center;margin-bottom:22px}
+.panel-title h3{font-family:Syne,sans-serif;font-size:23px;margin:0;letter-spacing:-.04em}
+.panel-title span{font-size:9px;color:var(--muted);text-transform:uppercase}
+#regionChart{display:block;width:100%;max-width:100%;height:auto}
+.chartbox{height:420px;max-height:420px;position:relative;overflow:auto;border:1px solid var(--line);background:#efefec}
+.chartbox canvas{display:block;width:100%}
+.chart-controls{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:14px}
+.chip{border:1px solid var(--line);background:transparent;padding:8px 11px;border-radius:20px;font-size:9px}
+.chip.active,.chip:hover{background:var(--ink);color:var(--white);border-color:var(--ink)}
+.explain{display:grid;grid-template-columns:repeat(3,1fr);border-top:1px solid var(--line);margin-top:25px}
+.explain article{padding:20px;border-right:1px solid var(--line)}
+.explain article:last-child{border-right:0}
+.explain b{font-family:Syne,sans-serif;font-size:19px}
+.explain p{font-size:10px;line-height:1.7;color:var(--muted)}
+.searchbar{display:grid;grid-template-columns:1fr 150px;gap:10px;margin-bottom:14px}
+.searchbar input,.searchbar select{
+  background:var(--white);border:1px solid var(--line);padding:13px 14px;outline:none;border-radius:5px;font-size:11px
+}
+.searchbar input:focus{border-color:var(--ink)}
+.tablewrap{max-height:540px;overflow:auto;border:1px solid var(--line);background:var(--white)}
+table{width:100%;border-collapse:collapse;font-size:10px}
+th,td{text-align:left;padding:12px 13px;border-bottom:1px solid #ddd}
+th{position:sticky;top:0;background:var(--ink);color:white;font-size:9px;text-transform:uppercase;letter-spacing:.08em;z-index:2}
+td:last-child,th:last-child{text-align:right}
+tbody tr:hover{background:#f0f0ec}
+.pill{font-size:8px;border:1px solid var(--line);padding:4px 7px;border-radius:20px}
+.coverage{display:grid;grid-template-columns:repeat(6,1fr);gap:10px;margin-top:18px}
+.coverage div{border:1px solid var(--line);padding:14px;background:rgba(255,255,255,.35)}
+.coverage strong{display:block;font-family:Syne,sans-serif;font-size:25px}
+.coverage span{font-size:8px;color:var(--muted);text-transform:uppercase}
+.citygrid{display:grid;grid-template-columns:repeat(3,1fr);gap:12px}
+.city{border:1px solid var(--line);background:var(--white);padding:22px;position:relative;min-height:190px}
+.city:before{content:"";position:absolute;top:0;left:0;right:0;height:4px;background:var(--orange)}
+.city .rank{font-size:9px;color:var(--muted)}
+.city h3{font-family:Syne,sans-serif;font-size:24px;margin:16px 0 5px;letter-spacing:-.04em}
+.city p{font-size:10px;line-height:1.6;color:var(--muted)}
+.city .bar{height:5px;background:#ddd;margin-top:18px}.city .bar i{display:block;height:100%;background:var(--orange)}
+.method{display:grid;grid-template-columns:1fr 1fr;gap:0;border:1px solid var(--line)}
+.method article{padding:30px;min-height:200px}.method article+article{border-left:1px solid var(--line)}
+.method h3{font-family:Syne,sans-serif;font-size:25px;margin:0 0 12px}
+.method p{font-size:11px;line-height:1.8;color:var(--muted)}
+.footer{padding:55px 0}
+.footerin{display:flex;justify-content:space-between;gap:30px;align-items:start}
+.footer strong{font-family:Syne,sans-serif;font-size:30px}
+.footer p{max-width:540px;color:var(--muted);font-size:10px;line-height:1.8}
+.source{font-size:9px;color:var(--muted);line-height:1.6;margin-top:20px}
+.news-tools{display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap;align-items:center;margin-bottom:18px}
+.news-tools input{flex:1;min-width:220px;background:var(--white);border:1px solid var(--line);padding:12px 14px;border-radius:5px;font-size:11px}
+.newsgrid{display:grid;grid-template-columns:repeat(3,1fr);gap:12px}
+.news{
+  border:1px solid var(--line);background:var(--white);padding:22px 22px 18px;min-height:240px;
+  display:flex;flex-direction:column;gap:10px
+}
+.news .when{font-size:9px;color:var(--muted);letter-spacing:.08em;text-transform:uppercase}
+.news h3{font-family:Syne,sans-serif;font-size:20px;margin:0;letter-spacing:-.04em;line-height:1.15}
+.news p{font-size:10px;line-height:1.7;color:var(--muted);margin:0;flex:1}
+.news .foot{display:flex;justify-content:space-between;align-items:center;gap:10px;margin-top:6px}
+.news a.more{font-size:9px;font-weight:700;letter-spacing:.08em;border-bottom:2px solid var(--orange);padding-bottom:2px}
+.featured{
+  border:1px solid var(--line);background:var(--ink);color:var(--white);padding:28px;
+  display:grid;grid-template-columns:1.2fr .8fr;gap:24px;margin-bottom:12px
+}
+.featured h3{font-family:Syne,sans-serif;font-size:28px;margin:8px 0 12px;letter-spacing:-.05em}
+.featured p{font-size:12px;line-height:1.7;color:#d7d7d2;margin:0 0 16px}
+.featured .stat{border-top:1px solid #3a3a3a;padding-top:14px;font-size:10px;color:#bdbdb7;line-height:1.7}
+.compare{
+  position:relative;width:100%;aspect-ratio:399/250;min-height:220px;overflow:hidden;background:#111;
+  border:1px solid #3a3a3a;user-select:none;touch-action:none;cursor:ew-resize
+}
+.compare img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;pointer-events:none}
+.compare .before-pane{position:absolute;inset:0 auto 0 0;width:52%;overflow:hidden}
+.compare .before-pane img{width:calc(100% * 100 / var(--cut,52));min-width:100%;height:100%}
+.compare-line{
+  position:absolute;top:0;bottom:0;left:52%;width:2px;background:#fbfaf6;
+  transform:translateX(-1px);z-index:2
+}
+.compare-knob{
+  position:absolute;top:50%;left:52%;transform:translate(-50%,-50%);
+  width:34px;height:34px;border-radius:50%;border:2px solid #fbfaf6;background:var(--ink);
+  z-index:3;display:grid;place-items:center;font-size:11px;color:#fff;letter-spacing:.02em
+}
+.compare-tag{
+  position:absolute;z-index:2;top:10px;font-size:9px;letter-spacing:.12em;font-weight:700;
+  padding:5px 8px;background:rgba(0,0,0,.55);color:#fff
+}
+.compare-tag.before{left:10px}
+.compare-tag.after{right:10px}
+.compare-hint{margin-top:8px;font-size:9px;color:#bdbdb7;letter-spacing:.06em}
+.fixgrid{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.fixcard{border:1px solid var(--line);background:var(--white);padding:22px;min-height:180px}
+.fixcard .num{font-family:Syne,sans-serif;font-size:13px;color:var(--orange);letter-spacing:.08em}
+.fixcard h3{font-family:Syne,sans-serif;font-size:22px;margin:10px 0 8px;letter-spacing:-.04em}
+.fixcard p{font-size:11px;line-height:1.7;color:var(--muted);margin:0}
+.diagram-wrap{border:1px solid var(--line);background:#efefec;padding:18px;overflow:auto}
+.diagram-wrap svg{display:block;width:100%;height:auto}
+.legend-row{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-top:14px}
+.legend-row div{border:1px solid var(--line);padding:12px;background:rgba(255,255,255,.4);font-size:10px;line-height:1.6;color:var(--muted)}
+.legend-row b{display:block;font-family:Syne,sans-serif;color:var(--ink);font-size:14px;margin-bottom:4px}
+.reveal{opacity:0;transform:translateY(18px);transition:.7s ease}.reveal.show{opacity:1;transform:none}
+
+/* Assistant dock */
+.assist-root{position:fixed;right:22px;bottom:22px;z-index:9999;font-family:"Space Mono",monospace;pointer-events:auto}
+.assist-fab{
+  width:74px;height:74px;border:0;border-radius:22px;padding:0;
+  background:transparent;position:relative;
+}
+.mini{
+  position:relative;overflow:hidden;flex:0 0 auto;
+  background:linear-gradient(160deg,#f7f7f4,#dcdcd8);
+}
+.assist-fab .mini{
+  width:74px;height:74px;border-radius:20px;
+  box-shadow:0 14px 30px rgba(0,0,0,.18),0 0 0 3px #fff;
+}
+.assist-head .mini{
+  width:42px;height:42px;border-radius:12px;
+}
+.mini-ring{
+  position:absolute;inset:8px;border-radius:14px;
+  background:linear-gradient(135deg,#2c6670,#1f4a53);
+  padding:7px;
+}
+.assist-head .mini-ring{inset:5px;padding:5px;border-radius:10px}
+.mini-face{
+  width:100%;height:100%;border-radius:9px;
+  background:
+    linear-gradient(rgba(31,74,83,.10) 1px,transparent 1px),
+    linear-gradient(90deg,rgba(31,74,83,.10) 1px,transparent 1px),
+    #1b0f08;
+  background-size:8px 8px,8px 8px,auto;
+  display:flex;align-items:center;justify-content:center;gap:8px;
+}
+.mini-face i{width:8px;height:8px;border-radius:50%;background:#fff;box-shadow:0 0 8px #fff;display:block}
+.assist-head .mini-face i{width:6px;height:6px}
+.ping{
+  position:absolute;top:-4px;right:-4px;width:16px;height:16px;border-radius:50%;
+  background:#2f9e44;border:3px solid #fff;animation:pulse 1.8s infinite;
+}
+@keyframes pulse{50%{box-shadow:0 0 0 8px rgba(47,158,68,.12)}}
+.assist-panel{
+  position:absolute;right:0;bottom:88px;width:min(380px,calc(100vw - 32px));
+  height:560px;background:#f7f7f4;border:1px solid var(--line);
+  border-radius:18px;box-shadow:0 24px 60px rgba(0,0,0,.18);
+  display:none;flex-direction:column;overflow:hidden;
+}
+.assist-root.open .assist-panel{display:flex}
+.assist-root.open .assist-fab{visibility:hidden;pointer-events:none}
+.assist-head{
+  display:flex;align-items:center;gap:12px;padding:14px 14px 12px;
+  border-bottom:1px solid var(--line);background:#fff;
+}
+.assist-head .who{flex:1}
+.assist-head strong{display:block;font-family:Syne,sans-serif;font-size:16px}
+.assist-head small{color:var(--muted);font-size:9px;letter-spacing:.08em}
+.assist-head small.busy{color:var(--orange)}
+.assist-close{
+  border:1px solid var(--ink);background:var(--ink);color:#fff;border-radius:8px;
+  font-size:10px;font-weight:700;letter-spacing:.06em;padding:8px 10px;min-width:64px
+}
+.assist-close:hover{background:#000}
+.assist-exit{
+  display:flex;align-items:center;justify-content:space-between;gap:10px;
+  padding:8px 12px 10px;border-top:1px solid var(--line);background:#fff;
+}
+.assist-exit p{margin:0;font-size:9px;color:var(--muted);letter-spacing:.06em}
+.assist-exit button{
+  border:1px solid var(--ink);background:transparent;padding:8px 12px;border-radius:8px;
+  font-size:10px;font-weight:700
+}
+.assist-exit button:hover{background:var(--ink);color:#fff}
+.assist-log{flex:1;overflow:auto;padding:14px;display:flex;flex-direction:column;gap:10px}
+.msg{max-width:92%;padding:11px 12px;border-radius:12px;font-size:11px;line-height:1.65;white-space:pre-wrap}
+.msg.bot{background:#fff;border:1px solid var(--line);align-self:flex-start}
+.msg.user{background:var(--ink);color:#fff;align-self:flex-end}
+.typing{align-self:flex-start;display:flex;gap:4px;padding:10px 12px;background:#fff;border:1px solid var(--line);border-radius:12px}
+.typing b{width:6px;height:6px;border-radius:50%;background:#999;animation:dot 1s infinite}
+.typing b:nth-child(2){animation-delay:.15s}.typing b:nth-child(3){animation-delay:.3s}
+@keyframes dot{0%,80%,100%{opacity:.25;transform:translateY(0)}40%{opacity:1;transform:translateY(-3px)}}
+.suggest{display:flex;flex-wrap:wrap;gap:6px;padding:0 14px 10px}
+.suggest button{
+  border:1px solid var(--line);background:#fff;padding:7px 9px;border-radius:99px;font-size:9px
+}
+.suggest button:hover{border-color:var(--ink)}
+.assist-form{display:grid;grid-template-columns:1fr 72px;gap:8px;padding:12px;border-top:1px solid var(--line);background:#fff;position:relative;z-index:2}
+.assist-form input{border:1px solid var(--line);border-radius:10px;padding:12px 12px;outline:none;font-size:11px}
+.assist-form input:focus{border-color:var(--ink)}
+.assist-form button{border:0;background:var(--orange);color:#fff;border-radius:10px;font-weight:700;min-height:44px}
+
+@media(max-width:1050px){
+ .navin{grid-template-columns:auto auto}.links{display:none}
+ .hero-grid{grid-template-columns:1fr}.hero-copy{border-right:0;border-bottom:1px solid var(--line);padding:70px 0}.hero-art{min-height:520px}
+ .grid4{grid-template-columns:repeat(2,1fr)}.citygrid,.newsgrid,.fixgrid,.legend-row,.pathstrip{grid-template-columns:1fr 1fr}.coverage{grid-template-columns:repeat(3,1fr)}
+ .featured{grid-template-columns:1fr}
+ .panel+.panel{border-left:0;border-top:1px solid var(--line)}
+}
+@media(max-width:650px){
+ .wrap{padding:0 16px}.navin{height:70px}.cta{padding:11px 12px}
+ h1{font-size:58px}.hero-art{min-height:390px}
+ .grid4,.citygrid,.newsgrid,.fixgrid,.legend-row,.pathstrip,.method{grid-template-columns:1fr}.explain{grid-template-columns:1fr}
+ .explain article{border-right:0;border-bottom:1px solid var(--line)}.coverage{grid-template-columns:repeat(2,1fr)}
+ .section{padding:60px 0}.section-head{display:block}.section-head p{margin-top:18px}
+ .assist-panel{height:70vh}
+}
+body.boot{overflow:hidden}
+body.boot .assist-root{visibility:hidden;pointer-events:none}
+.boot-screen{
+  position:fixed;inset:0;z-index:10000;background:var(--bg);color:var(--ink);
+  display:flex;flex-direction:column;overflow:hidden;
+}
+.boot-screen:before{
+  content:"";position:absolute;inset:0;opacity:.18;pointer-events:none;
+  background-image:linear-gradient(rgba(0,0,0,.035) 1px,transparent 1px),linear-gradient(90deg,rgba(0,0,0,.035) 1px,transparent 1px);
+  background-size:34px 34px;
+}
+.boot-screen.off{opacity:0;transform:translateY(-12px);pointer-events:none;transition:.55s ease}
+.boot-top,.boot-bot{
+  position:relative;z-index:1;display:flex;justify-content:space-between;align-items:center;
+  padding:22px 28px;border-bottom:1px solid var(--line);font-size:10px;letter-spacing:.12em;text-transform:uppercase;
+}
+.boot-bot{border-bottom:0;border-top:1px solid var(--line)}
+.boot-mid{
+  position:relative;z-index:1;flex:1;display:grid;place-items:center;padding:30px 20px;
+}
+.boot-card{max-width:820px;width:min(820px,100%);text-align:center}
+.boot-kicker{color:var(--orange);font-size:11px;font-weight:700;letter-spacing:.16em;margin-bottom:18px}
+.boot-card h1{
+  font-family:Syne,sans-serif;font-size:clamp(48px,8vw,96px);line-height:.82;
+  letter-spacing:-.07em;margin:0 0 22px;
+}
+.boot-card p{max-width:560px;margin:0 auto 28px;color:#343434;font-size:13px;line-height:1.8}
+.boot-mark{
+  width:58px;height:58px;border:1.5px solid var(--ink);border-radius:2px;margin:0 auto 22px;
+  display:grid;place-items:center;position:relative;background:var(--bg);
+}
+.boot-mark:before,.boot-mark:after{content:"";width:6px;height:6px;background:var(--ink);border-radius:50%;position:absolute;top:16px}
+.boot-mark:before{left:13px}.boot-mark:after{right:13px}
+.boot-actions{display:flex;gap:10px;justify-content:center;flex-wrap:wrap}
+.boot-go{
+  background:var(--ink);border:1px solid var(--ink);color:#fff;padding:16px 22px;
+  border-radius:2px;font-weight:700;font-size:12px;letter-spacing:.08em;
+}
+.boot-go:hover{transform:translateY(-1px);box-shadow:0 8px 20px rgba(27,30,34,.16)}
+.boot-meta{border:1px solid var(--line);background:transparent;padding:16px 22px;border-radius:8px;font-size:11px;font-weight:700}
+.boot-stats{display:grid;grid-template-columns:repeat(3,1fr);gap:0;margin-top:34px;border:1px solid var(--line)}
+.boot-stats div{padding:16px 10px;border-right:1px solid var(--line)}
+.boot-stats div:last-child{border-right:0}
+.boot-stats b{display:block;font-family:Syne,sans-serif;font-size:22px}
+.boot-stats span{display:block;margin-top:6px;font-size:8px;color:var(--muted);letter-spacing:.1em;text-transform:uppercase}
+@media(max-width:650px){
+  .boot-top,.boot-bot{padding:16px}
+  .boot-stats{grid-template-columns:1fr}
+  .boot-stats div{border-right:0;border-bottom:1px solid var(--line)}
+}
+</style>
+</head>
+<body class="boot">
+<div class="boot-screen" id="bootScreen">
+  <div class="boot-top">
+    <span>INNOVATEX // TECHFEST // IIT BOMBAY</span>
+    <span>SYSTEM 01 / 2026</span>
+  </div>
+  <div class="boot-mid">
+    <div class="boot-card">
+      <div class="boot-mark"></div>
+      <div class="boot-kicker">STARTUP / COASTAL DATA INTERFACE</div>
+      <h1>COAST//<br>TRACE</h1>
+      <p>A visual briefing on rising plastic pollution in coastal cities. Enter the dashboard to read global signals, search a country, and ask TRACE.</p>
+      <div class="boot-actions">
+        <button class="boot-go" id="bootEnter" type="button">ENTER DASHBOARD</button>
+        <button class="boot-meta" id="bootSkip" type="button">SKIP INTRO</button>
+      </div>
+      <div class="boot-stats">
+        <div><b>350M t</b><span>Plastic waste / year</span></div>
+        <div><b>1–2M t</b><span>Estimated ocean input</span></div>
+        <div><b>2026</b><span>Dashboard year</span></div>
+      </div>
+    </div>
+  </div>
+  <div class="boot-bot">
+    <span>MADE BY ARJUN PATIL</span>
+    <span>PRESS ENTER TO BEGIN</span>
+  </div>
+</div>
+<nav class="nav">
+  <div class="wrap navin">
+    <a class="brand" href="#top">
+      <span class="brandmark"></span>
+      <span><small>INNOVATEX // IIT BOMBAY</small><strong>COAST//TRACE</strong></span>
+    </a>
+    <div class="links">
+      <a href="#overview">Overview</a><a href="#global">Global Data</a><a href="#explorer">Explorer</a><a href="#cities">Coastal Lens</a><a href="#reports">Reports</a><a href="#solutions">Solutions</a><a href="#method">Method</a>
+    </div>
+    <a class="cta" href="#explorer">EXPLORE DATA</a>
+  </div>
+</nav>
+<div class="tidebar" aria-hidden="true"></div>
+<main id="top">
+<section class="hero">
+  <div class="wrap hero-grid">
+    <div class="hero-copy reveal">
+      <div class="kicker">DOMAIN OVERVIEW / 01</div>
+      <h1>PLASTIC<br>POLLUTION<br>IS MOVING<br>ASHORE.</h1>
+      <p>COAST//TRACE turns a global environmental problem into a readable decision interface — connecting mismanaged plastic, river pathways and coastal exposure without burying the user in technical jargon.</p>
+      <div class="hero-actions">
+        <a class="btn dark" href="#global">VIEW GLOBAL SIGNAL</a>
+        <a class="btn" href="#explorer">SEARCH A PLACE</a>
+        <button class="btn" type="button" id="openAssistHero">ASK TRACE BOT</button>
+      </div>
+    </div>
+    <div class="hero-art reveal">
+      <div class="shore" aria-hidden="true">
+        <svg viewBox="0 0 520 520" role="img">
+          <rect width="520" height="520" fill="#ebe7de"/>
+          <rect y="0" width="520" height="210" fill="#e7e2d8"/>
+          <path d="M0 198 C60 186 110 214 170 200 C240 184 300 216 370 198 C430 184 480 208 520 196 L520 260 C470 248 410 268 350 252 C280 234 210 266 140 250 C80 238 30 258 0 246 Z" fill="#d9cbb6"/>
+          <path d="M0 246 C70 228 140 268 210 248 C290 226 350 274 430 250 C480 238 508 258 520 250 L520 520 L0 520 Z" fill="#c5d5d8"/>
+          <path d="M0 292 C80 274 150 318 230 296 C310 274 370 326 450 300 C490 290 512 310 520 304 L520 520 L0 520 Z" fill="#2a5d66"/>
+          <path d="M0 348 C90 330 170 372 250 350 C340 326 400 380 480 354 C504 346 516 360 520 356 L520 520 L0 520 Z" fill="#1a3340"/>
+          <path d="M0 402 C100 388 180 424 270 404 C360 384 430 430 520 408 L520 520 L0 520 Z" fill="#132830"/>
+          <path d="M0 246 C70 228 140 268 210 248 C290 226 350 274 430 250 C480 238 508 258 520 250" fill="none" stroke="#1b1e22" stroke-width="1.15"/>
+          <g fill="#3e564e">
+            <path d="M428 236 l8 14 h-16 z"/>
+            <path d="M444 232 l7 18 h-14 z"/>
+            <path d="M458 238 l6 12 h-12 z"/>
+            <path d="M472 234 l8 16 h-16 z"/>
+          </g>
+          <g stroke="#1b1e22" fill="#efece4" stroke-width="1.2">
+            <rect x="36" y="118" width="28" height="72"/>
+            <rect x="68" y="86" width="24" height="104"/>
+            <rect x="96" y="104" width="20" height="86"/>
+            <rect x="120" y="128" width="16" height="62"/>
+            <rect x="28" y="148" width="14" height="42"/>
+          </g>
+          <g fill="#1b1e22" opacity=".22">
+            <rect x="42" y="128" width="5" height="7"/><rect x="52" y="128" width="5" height="7"/>
+            <rect x="42" y="140" width="5" height="7"/><rect x="52" y="140" width="5" height="7"/>
+            <rect x="42" y="152" width="5" height="7"/><rect x="52" y="152" width="5" height="7"/>
+            <rect x="74" y="98" width="5" height="7"/><rect x="82" y="98" width="5" height="7"/>
+            <rect x="74" y="110" width="5" height="7"/><rect x="82" y="110" width="5" height="7"/>
+            <rect x="74" y="122" width="5" height="7"/><rect x="82" y="122" width="5" height="7"/>
+            <rect x="74" y="134" width="5" height="7"/><rect x="82" y="134" width="5" height="7"/>
+            <rect x="101" y="114" width="4" height="6"/><rect x="108" y="114" width="4" height="6"/>
+            <rect x="101" y="126" width="4" height="6"/><rect x="108" y="126" width="4" height="6"/>
+          </g>
+          <rect x="24" y="188" width="128" height="6" fill="#cfc8bb"/>
+          <rect x="148" y="186" width="46" height="8" rx="1" fill="#b9b3a6"/>
+          <g fill="none" stroke="#1b1e22" stroke-width="1.3">
+            <rect x="156" y="178" width="30" height="10"/>
+            <path d="M160 178 v10 M166 178 v10 M172 178 v10 M178 178 v10 M184 178 v10"/>
+          </g>
+          <path d="M186 190 C214 196 226 214 248 226 C276 240 292 258 312 268" fill="none" stroke="#1b1e22" stroke-width="1.4"/>
+          <path d="M248 226 C256 232 268 238 286 244" fill="none" stroke="#2a5d66" stroke-width="7" stroke-linecap="round" opacity=".35"/>
+          <g fill="#efece4" stroke="#1b1e22" stroke-width=".8">
+            <rect x="198" y="198" width="6" height="10" rx="1"/>
+            <rect x="232" y="220" width="8" height="5" rx="1"/>
+            <rect x="268" y="236" width="5" height="8" rx="1"/>
+          </g>
+          <g fill="#efece4" opacity=".95">
+            <rect x="70" y="268" width="11" height="5" rx="1"/>
+            <rect x="128" y="280" width="7" height="4" rx="1"/>
+            <rect x="176" y="262" width="13" height="4" rx="1"/>
+            <rect x="238" y="274" width="8" height="5" rx="1"/>
+            <rect x="296" y="258" width="10" height="4" rx="1"/>
+            <rect x="348" y="286" width="6" height="4" rx="1"/>
+            <rect x="402" y="270" width="12" height="5" rx="1"/>
+            <rect x="454" y="262" width="7" height="4" rx="1"/>
+            <rect x="88" y="322" width="9" height="4" rx="1"/>
+            <rect x="210" y="336" width="11" height="5" rx="1"/>
+            <rect x="330" y="318" width="8" height="4" rx="1"/>
+            <rect x="470" y="330" width="10" height="4" rx="1"/>
+          </g>
+          <path d="M388 392 l46 -8 l8 4 l-40 12 z" fill="#d8d3c8" opacity=".35"/>
+          <g fill="none" stroke="#d7e2e4" stroke-width="1" opacity=".35">
+            <path d="M20 430 C80 422 140 438 200 428"/>
+            <path d="M260 446 C330 436 400 452 500 440"/>
+          </g>
+          <line x1="36" y1="58" x2="36" y2="78" stroke="#5c636c" stroke-width="1"/>
+          <text x="42" y="72" font-family="Space Mono, monospace" font-size="10" fill="#5c636c">CITY / STREET</text>
+          <line x1="156" y1="164" x2="156" y2="176" stroke="#5c636c" stroke-width="1"/>
+          <text x="162" y="172" font-family="Space Mono, monospace" font-size="10" fill="#5c636c">NALLAH GRATE</text>
+          <text x="300" y="220" font-family="Space Mono, monospace" font-size="10" fill="#5c636c">DRAIN → RIVER</text>
+          <text x="24" y="456" font-family="Space Mono, monospace" font-size="10" fill="#d7e2e4">SEA / ARABIAN MARGIN</text>
+          <text x="24" y="474" font-family="Space Mono, monospace" font-size="10" fill="#9aadaf">TIDE RETURNS STREET PLASTIC</text>
+        </svg>
+      </div>
+      <div class="hero-code">LAND / DRAIN / RIVER / SEA / 2026</div>
+      <div class="hero-note">A visual research prototype<br>built for InnovateX — Techfest, IIT Bombay.<br>Made by Arjun Patil</div>
+    </div>
+  </div>
+</section>
+<div class="ticker"><span>HIGH TIDE RETURNS STREET WASTE • NALLAHS TO THE ARABIAN SEA • MONSOON IS THE MOVING BELT • COLLECT BEFORE THE DRAIN • HIGH TIDE RETURNS STREET WASTE • NALLAHS TO THE ARABIAN SEA • </span></div>
+<div class="pathstrip">
+  <div><b>01 Land</b>Waste is made and missed on streets, markets and rooftops.</div>
+  <div><b>02 Drain</b>Rain lifts light plastic into nallahs and stormwater outfalls.</div>
+  <div><b>03 River</b>Creeks and rivers concentrate the load toward the mouth.</div>
+  <div><b>04 Sea</b>Tide and current drop it on beaches — or carry it offshore.</div>
+</div>
+<section class="section" id="overview">
+<div class="wrap">
+  <div class="section-head reveal">
+    <div><div class="eyebrow">01 / THE SIGNAL</div><h2>THE PROBLEM<br>AT A GLANCE.</h2></div>
+    <p>The numbers below establish scale. They are intentionally separated from the detailed explorer so a first-time visitor can understand the problem before interacting with the data.</p>
+  </div>
+  <div class="grid4 reveal">
+    <div class="metric"><span class="tag">GLOBAL / ANNUAL</span><div class="n">350M t</div><div class="l">Plastic waste generated worldwide, approximately.</div></div>
+    <div class="metric"><span class="tag">OCEAN / ANNUAL</span><div class="n">1–2M t</div><div class="l">Recent estimates of plastic entering the oceans each year.</div></div>
+    <div class="metric"><span class="tag">2026 / ENVIRONMENT</span><div class="n">72M t</div><div class="l">Earth Action estimate of plastic mismanaged into the environment in 2026.</div></div>
+    <div class="metric"><span class="tag">SYSTEM</span><div class="n">56%</div><div class="l">Share of the latest national inventory attributed to Asia on this 2026 dashboard.</div></div>
+  </div>
+  <div class="explain reveal">
+    <article><b>01 — Waste</b><p>Plastic becomes a pollution problem when it is not securely collected, recycled, treated or contained.</p></article>
+    <article><b>02 — Pathway</b><p>Rainfall, rivers, terrain and distance to coastlines influence whether mismanaged waste can reach the sea.</p></article>
+    <article><b>03 — Coast</b><p>Coastal cities sit at the final interface between land-based waste systems and marine ecosystems.</p></article>
+  </div>
+</div>
+</section>
+<section class="section" id="global">
+<div class="wrap">
+  <div class="section-head reveal">
+    <div><div class="eyebrow">02 / GLOBAL DATA</div><h2>ONE PLANET.<br>MANY SIGNALS.</h2></div>
+    <p>Use the charts as a visual briefing. Hover or tap bars to inspect a value. The global view separates regional scale from country-level detail.</p>
+  </div>
+  <div class="split reveal">
+    <div class="panel">
+      <div class="panel-title"><h3>Regional share of environmental emissions</h3><span>2026 briefing / % of global</span></div>
+      <canvas id="regionChart" width="760" height="430"></canvas>
+      <div class="source">Source series: Cottom et al. (2024) via Our World in Data (updated Jan 2026). Country ranking uses the latest complete published inventory, shown here as the 2026 briefing. Earth Action (2026) estimates about 72 million tonnes of plastic will be mismanaged into the environment this year.</div>
+    </div>
+    <div class="panel">
+      <div class="panel-title"><h3>Top country signals</h3><span>2026 briefing / global share</span></div>
+      <div class="chart-controls">
+        <button class="chip active" data-top="10">TOP 10</button>
+        <button class="chip" data-top="20">TOP 20</button>
+        <button class="chip" data-top="all">ALL REPORTED</button>
+      </div>
+      <div class="chartbox"><canvas id="countryChart" width="780" height="360"></canvas></div>
+      <div class="source">This is a country-level share from the latest complete published inventory (Cottom et al. 2024 / OWID Jan 2026), presented as the 2026 briefing. It is not a live beach sensor.</div>
+    </div>
+  </div>
+</div>
+</section>
+<section class="section" id="explorer">
+<div class="wrap">
+  <div class="section-head reveal">
+    <div><div class="eyebrow">03 / GLOBAL EXPLORER</div><h2>FIND<br>YOUR PLACE.</h2></div>
+    <p>Search any country or region in the embedded dataset. Sorting and filtering are designed for a newcomer: type a name, select a region, then read the one-line explanation.</p>
+  </div>
+  <div class="panel reveal" style="border:1px solid var(--line)">
+    <div class="searchbar">
+      <input id="search" placeholder="Search a country or region… e.g. India, Brazil, Fiji">
+      <select id="regionFilter">
+        <option value="all">ALL REGIONS</option>
+        <option>Asia</option><option>Africa</option><option>Europe</option><option>North America</option><option>South America</option><option>Oceania</option><option>Other</option>
+      </select>
+    </div>
+    <div class="tablewrap">
+      <table>
+        <thead><tr><th>Place</th><th>Region</th><th>2026 briefing share</th><th>Interpretation</th></tr></thead>
+        <tbody id="dataRows"></tbody>
+      </table>
+    </div>
+    <div class="coverage">
+      <div><strong id="reportedCount">0</strong><span>Reported places loaded</span></div>
+      <div><strong>2026</strong><span>Dashboard year</span></div>
+      <div><strong>CC BY</strong><span>OWID chart license</span></div>
+      <div><strong>200+</strong><span>Source chart coverage</span></div>
+      <div><strong>GLOBAL</strong><span>Country + region lens</span></div>
+      <div><strong>SEARCH</strong><span>Instant filtering</span></div>
+    </div>
+  </div>
+</div>
+</section>
+<section class="section" id="cities">
+<div class="wrap">
+  <div class="section-head reveal">
+    <div><div class="eyebrow">04 / COASTAL CITY LENS</div><h2>FROM COUNTRY<br>TO CITY.</h2></div>
+    <p>A competition prototype should make the abstract problem tangible. These city cards connect recognizable coastal systems to the country-level signal without pretending that a national value is a city measurement.</p>
+  </div>
+  <div class="citygrid reveal">
+    <article class="city"><span class="rank">01 / SOUTH ASIA</span><h3>Mumbai</h3><p>Urban drainage, monsoon runoff and shoreline pressure make waste leakage a critical coastal-system question.</p><div class="bar"><i style="width:86%"></i></div></article>
+    <article class="city"><span class="rank">02 / SOUTHEAST ASIA</span><h3>Manila</h3><p>Dense coastal settlement and river-connected waste pathways make source interception especially important.</p><div class="bar"><i style="width:94%"></i></div></article>
+    <article class="city"><span class="rank">03 / EAST ASIA</span><h3>Shanghai</h3><p>A major coastal economic hub where river systems and urban waste management meet a large marine boundary.</p><div class="bar"><i style="width:72%"></i></div></article>
+    <article class="city"><span class="rank">04 / EAST ASIA</span><h3>Jakarta</h3><p>Low-lying urban districts, waterways and coastal exposure create a strong case for upstream interception.</p><div class="bar"><i style="width:82%"></i></div></article>
+    <article class="city"><span class="rank">05 / WEST AFRICA</span><h3>Lagos</h3><p>A rapidly growing coastal city where drainage, collection systems and shoreline resilience interact.</p><div class="bar"><i style="width:61%"></i></div></article>
+    <article class="city"><span class="rank">06 / SOUTH AMERICA</span><h3>Rio de Janeiro</h3><p>Urban watersheds, beaches and dense development illustrate how land-based waste can become a coastal issue.</p><div class="bar"><i style="width:42%"></i></div></article>
+  </div>
+  <div class="source reveal">City cards are qualitative design examples for the prototype. Their bars are interface indicators, not measured city pollution scores.</div>
+</div>
+</section>
+<section class="section" id="reports">
+<div class="wrap">
+  <div class="section-head reveal">
+    <div><div class="eyebrow">05 / FIELD REPORTS</div><h2>NEWS +<br>RESEARCH.</h2></div>
+    <p>Short briefings from newspapers and studies. Each card is a summary written for this page. Open the original report for the full story. These are not live sensors.</p>
+  </div>
+  <article class="featured reveal">
+    <div>
+      <div class="eyebrow">LEAD BRIEFING / AJNAR RIVER 2026</div>
+      <h3>One student started. The river changed.</h3>
+      <p>The left half of the picture is what the Ajnar looked like when the bed was a dump: bottles, bags, offerings and sludge stacked between the concrete pillars. The right half is after months of lifting that load by hand. Same place. Same person. Different river.</p>
+      <p>Surendra Singh Choudhary — a BSc student from Biaora, Rajgarh, known online as Bittu Tabahi — started on Republic Day, 26 January 2026. The stretch sat beside a temple he passed often. A few friends came once. The mud, smell and size of the pile sent them home. He kept a short daily window, about 3pm to 6pm, with bags he paid for himself. Reports put his own spend near ₹30,000.</p>
+      <p>Locals called the work crazy and nicknamed him a drain-cleaner. The water was filthy and the hours were hard on his hands. He still posted the change. When the clips travelled, Anand Mahindra defended the effort, Madhya Pradesh’s chief minister met him, Biaora’s municipality sent machines, and Boyan Slat of The Ocean Cleanup wrote a public invite to join the team.</p>
+      <p>Drag the white line. Left is the waste bed. Right is open channel. That is the whole argument of this page in one frame: plastic does not vanish — someone has to take it out before it rides a drain to the sea.</p>
+      <a class="btn" href="https://www.independent.co.uk/asia/india/bittu-tabahi-ajnar-river-trash-cleanup-b3045479.html" target="_blank" rel="noopener">READ THE INDEPENDENT</a>
+    </div>
+    <div>
+      <div class="compare" id="compare">
+        <img id="compareAfter" src="data:image/jpeg;base64,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" alt="After a waterway cleanup, open water between pillars">
+        <img id="compareBeforeImg" src="data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD/2wBDAAQDAwMDAgQDAwMEBAQFBgoGBgUFBgwICQcKDgwPDg4MDQ0PERYTDxAVEQ0NExoTFRcYGRkZDxIbHRsYHRYYGRj/2wBDAQQEBAYFBgsGBgsYEA0QGBgYGBgYGBgYGBgYGBgYGBgYGBgYGBgYGBgYGBgYGBgYGBgYGBgYGBgYGBgYGBgYGBj/wAARCAD6AY8DASIAAhEBAxEB/8QAHwAAAQUBAQEBAQEAAAAAAAAAAAECAwQFBgcICQoL/8QAtRAAAgEDAwIEAwUFBAQAAAF9AQIDAAQRBRIhMUEGE1FhByJxFDKBkaEII0KxwRVS0fAkM2JyggkKFhcYGRolJicoKSo0NTY3ODk6Q0RFRkdISUpTVFVWV1hZWmNkZWZnaGlqc3R1dnd4eXqDhIWGh4iJipKTlJWWl5iZmqKjpKWmp6ipqrKztLW2t7i5usLDxMXGx8jJytLT1NXW19jZ2uHi4+Tl5ufo6erx8vP09fb3+Pn6/8QAHwEAAwEBAQEBAQEBAQAAAAAAAAECAwQFBgcICQoL/8QAtREAAgECBAQDBAcFBAQAAQJ3AAECAxEEBSExBhJBUQdhcRMiMoEIFEKRobHBCSMzUvAVYnLRChYkNOEl8RcYGRomJygpKjU2Nzg5OkNERUZHSElKU1RVVldYWVpjZGVmZ2hpanN0dXZ3eHl6goOEhYaHiImKkpOUlZaXmJmaoqOkpaanqKmqsrO0tba3uLm6wsPExcbHyMnK0tPU1dbX2Nna4uPk5ebn6Onq8vP09fb3+Pn6/9oADAMBAAIRAxEAPwD6gooor6I+fCiiigAooooAKKKr3d1HaW7SSEAAUm7ATPIkYyzAVnXmt2dpEXeVePevK/GnxKWykeKCXkehrx/XPiZf3SsgmbB9686tmUKbsjWNJs+hL74l6ZbzlPOXg+ta2h+OtO1JwiTLk+9fFV1rt9cTFzM3PvW14a8W32n6jGTM2M+tcMc1blrsa+xR95W8ySxh0YEGp+G4rzj4d+Jm1bSxvbJCj+tdZNqE8l2LS0mSKdgdruNwXAySR9BXs05qcVJBsbW2j7v3qrebt+9v3UjS7qsC4rUeb9KrLLsp3m7qjlKJd1C02k3pTJHs1RM1DbKiaqAl301mplFUSFPjlpv+xTo9ny/x7qJgWY53qRbmqysjJvqNonb7r1hymnMaH2z/AGzR9sT+9Wb9kb+/UnkItHKVzSLLXiN/HUbT7qi2UtHKTzCbn2Ub6fSbKsBqz05Z3p/lJSKqUAR3S/bNNntG/wCW8DRf99L/APZVyF0qT/HiyT/lvbeHGljlX70TS3Sr/wC0q7jYleYXGqvB+0trdr9nv3/4pqwXzbWFpfK3XV2zfd/i+7WUijvVl+2PLFE+zy5PKudrfxf3V/2f8/3q5bwDZxS/DfT5YkRVW/u7qPb/ABfv5/8A4qr0OvafbQyXsGn6zttm+6thP+9Vf4fu1U+FM/2n4J+GbhvuyWEcvzfxbvm/9mpfaJOz3bnp6tUa9aTfWgHmfjbwn4cvrzwlb6no+my/a/FLSySy2yuzborufb/47/47XSNofhFb9bKLwp4cS98vftXToNu3/nrt2/5aqfjhol8Z+ArSV9+7WLlo1/vMthc7f/RtdAsEXnb2uIn1BV+9uX5v9n/drPkiVzSOF8L+E/DS+IfG0NjounQf8TyBEb7JHu3La2zs27/e316jurifAs9vfTeK7uB0eOTxBOqt/wBcooIv/ZWrptU1C30XRLnVbzzfslpH5sjRRtKyr/urTjy8oSkaW6nbq4C++MXw60/R49QbxLa3UE674Psrb2l+ZV2/73zLW/4d8Z+H/FW5/D129/bKvzXkUbeRu3bdvm/d3Vj7WnKXxAdJTLiWOCEzSlUQHBLfw0xW/wBhq8S+IPxO0HVLu88N3IV9Oik2yyf89GRv/iqzxOKjho80jvwGBqYup7Omet0UUV6p4QUUZHqKMj1FABRRkeopMj1FAC1w/wAQNRktNHk2Eg4NdvkeorjfHemm+0iRU5ODWGIv7N2KjufJmv3813qUhdyeTXMXKHfmuu8R6VNZanJuQgZNc9JDv4xXx07qTudq2Mmr+l2ktzfosak81taJ4VudUulVIyQT6V6DY+EItAeO4uVAxzzW1KhKXvdAvrY9W+E2lz2um7pAR8i9fxrs5YmfxVbxZGGDjkn+43pzXnenfEfSdG07YJEBAA61y+v/ABz0/SDJrM3mtFbg5MGNwJ+UEZ9CQfoDX0FGrCMEkTKm09T6R2uvyf3aNtYnhPxjoXi/wHB4r0i7aXT5F3ebLGyf71T6l4o8OaUkst5rESxxru3ff3L/ALO3/wBBrrjVjIixqbUb7r0eVt+6/wAtePeOvjd4f0N7SWz1D/RGj82SeJV+X/eVvu14n4u/aF1i816B9F1uWLT12vGyx/xbfvbf91mrmr4ynTNIUJSPs2OVJYd8T7l/hps0qQJJLJcKsSru3M2zatfOfh/x6/iH4StrviXx3rek/aWZWl05ZYltlWfau3yl/i2r/wB9VHJ8RPBjaU3g+X4p6pqUd6uyOC+sJZWlbdu+95W7+H+9Shjo8vMX9VkfSEM8U8PmwSrLF/CyNuWpK5Twfc2Vn4Plu5biJYJG/wBe22L+Ff71dSrebtda6qVVSjzGEo8suUkVa4f4nfESL4aeGItdudEv9UgaTbItr/yyX+838Ndt/wChV8+/tLeOrfSn0vwlquj2F/oF78+o+bc7Z9u7/lltbcrf7X3f92pr1eWIRjzHC/Fb9oZfF2mRR/CfxXPayWi+fcxSq1nL5m5lXbu/1u7+627+H5a8ZHxP+Jvjjx1ZaxJ4j/svXVXyo57W5a13LtZtzLu2/wDxW7+KvOL7ZPrF7eiFbewWZvJtnjbytv8ACu1m/h3Vl6mttb6jI9vqTahEy7mla38jc3+yteJVnKp9o6o0ons8fx7+K/gm2ufB+i6nF/rJN15LF5s8rN/Ful+ZW3f+hV9Q/Cf48+DIvCtppnjrx00viKTdcXt1eRypArfNuVW8pVXbt/u7f9qvz/0VrTUL/wArUNQ+wRqrN5rRtLub+78vzV698H/Cb+IfFqxQW9hqyxr9nh0e+u/KW7kZW/5aqu6Jfl+98rUUqtSMuWISjE/SCGeKe2iuIHSWKRVZWX7rLT91cla+OvA+n6D5TeJbBI9NZbC5X7T5rW0ir91m/i2/3qzdN+MHw/vod/8AwkFujLB5sn3tsTbtu3/er1ZYinH4pHOd8qpTW2Vgf8Jx4S+wQXreI9Lignj81WluVT/0Ksu6+K3wys9z3nxD8Mxbf72oxf8AxVXCrGZfKdnvpa8ym/aA+CkH+t+Jeg/9sp9//oK1534y/av8P2OpW1v4Hew1e0ZZFmvrqOeJYpP4dq7f3q/7S0SqxiKEJH0mrU7dXzV4N/at0q8mnTxxpX9lrt3QfYI5J2/3W/8Aiq27j9q/4bxXi2kFl4huJZFbb/okaL/49LU+1iXKlKJ7wzVwGjrbt8b/AB1ezy7oltNJt/N/u7Vnl/8AZq4mH9p/wfLrEdvLpWsxW0m3dPKsX7r5vvbVbc1bvgGeLxL8QvG3iPStbtZ9P/ta2ij8qPzYpfKsYPm+9/01olOJHLy/Ed5NPLLpt3qt1/osttHJcLA391Vb97/47/wGqHw3tEs/g54UtNm3y9HtPl/7YLWN8RP7ds/hL4mu11WBGttMvZ/NW0/6YN8v3v4q6vw6v2PwfpNp5X+osoIvlb+7EtV9oPsmttT+Gm7dtNWX+8jpR58X8SS/981sScN4utbfU/i74J0y+iguFjj1S8XzY1bayxQRK3/kWtz+ytHlma3g0rS4tSjVftO20i/dL/e+7/F/DXNeItTSD9oTw26pPL5eg6ltaK2lb5mntF/hX7vytXQXWuaPplzJqGy6WSNVa5laynVZV/i/h/h/h/3a5wOZ8D33h/wv4G1fU9Qlt7DT28T6pEqbf4vt8qqqqv3m+WvlT4vfHa41bx+82geO9Ws1g3LD9mspLLdtf5Vb97/vfMy13/xG1q41z9l2DSvB2oT3V7qWtXt1JFBuiVo5byeX5mbb/C1fLeo+Hrhf7U1XWbfyIbT91HIiKsXnf3VX7rfw/wC9XnYmvGp+7jI7PqtSPvSiU7jVbSfUlddQvfP+ZpP3nyyN/wCy12/hj4o+ML+bStBn1vXn0a0k2x6ZYzS/Ltbfti+9/wDY/wCzXmOlXdhczXENzbxtcXEjeZer8u1f9lFX5a07HVdV8J3MF9pGq38SrI0sXkMyeU23azf7235d1cPLGPuj5D9JrXxR/ZHwfnu9F0fUrD7JbL9m/tiOX97Izfd/et5srfNu3bf4t1fPr6DdSWsepzbMTSNv/d/xf99Vx1j8bdY8T+Eok8R+LZbxYG81YpY2lbdu+b5tvy/L/tU+b4z6cmkKguJoLiKVljtWtlKsn97d92uTH15V5ckT6XJ/Y4Snzyl7x7qPjfZn+KtWz+MFhLbl2evigTaitotx9jLBugWXP9Kni1KZrQb1v4d4cp5MayA7fcste3/aXmfOf2ej67vPjXaRXBVX4qIfGy3I+/XxrrAnspoZhrKmKYZDXAEJH4FjUUV3OZFgh1rTpJyu7Z55A/PFUsfJ7EPApbn2e/xtt1QndWRP8f4YpNu+vlPSY/EGtzmHTn0252nD7Lxht/BkFbeqeAPF1lCZjaabcYZt2NTiUBP4Wzk/e7Uvr0l8Q1gk9j6JP7Q9uOr1Xuf2hLKeEo5yDXzLF4d124dov7HikdfvC31G3fb/AN9OtTXHgC+eYQsl5uK7v9E+z3P6JPn9Kr69fqL6nFHpPin4kaXqbs6YBNcvYeI7W4uwM8E15rqXhjTbO+mtJ/FhtZ4W2SRXllJCyn05Jq1pnhi4juI2s/EuiXascDF2EJ/Bq4qsI1HzI0jQij6m8HeItMsLdZHVScU/xj4zt9TtzHbsAenFeDeVrlpoTXDxOVG4AxSpJnAz/C1cU/ifxTZss11oV/GrjcvmK65/NalTnyciNFh6cXzHq999tnkyJm259apXlq81kkI2u4ljk2uodW2yKxBU8EHHSvO4vivcwkRS6KXPp9oIP5bK6LQfHunaxO6Xel3MKgYBVlcMxxgZ49c1mva00ayhSqHdWfijxXp9zevL4zuNO0uBrm9a1iv2WKJfN3LF5H935tu3/gNcu3jG0/tiW7bxHqMsbSb2aJZGVdzfN/6FVS61Xwrdwy2X9sQIzSMs0F02z/0Kta3sbKWzgt7a4gdY41+W1kXbt/h+VaiVeaiV7JR+EqXlzZaq62Wp3bS+Yqyss9pP+6Vl3L/D/wB81jfYYrbTWSDUFijgWNmXcyf89dq10F9YvE9s9t9os1XbuZmaXd8v3v8Ad+aqmsaZ9p8MTxT6h57K1szRbV81v9fubdt3f3f++lpRq83xk8sv5T1nwH8RvhlY/B+PRNeiuri2XzHkgZYnVmaXcq/5/u1r2+ufs/6n4qtNQXwzLFdwbfs07TeUsX3vvKsqrXzfHpFvpnhtrvUNHungknVY22/Lu2/+hfNWbNLaXib7bz7eLcsW2BW/hXbWvt5R+E55HonxW8ZzX2t/Ybm4S/020toEj/s7dFbbm3Nu27m2t/D96qmm+IfFtz4TnuNKuNZS0jjaLzUu59q/L93czf7W6pvgjqVlP4m8Q6bqvhy31m08uPy4rz/ll95f4q9q1zSNMg/Z+8XvBbwIzWk7rAu3cv7r+7TlRlze0jImlD3veOd8C/GnxH4F8B2V1qviW4ltGu5P9DuoI7htvm/Mys3+9/erzH4++ONT8e/EqPU4NSlisY7ZbeONv3SK27/W7dzL/Eu5lrD8X+LdP1D4a+HfCUVpLFc6S168krbdrNLPuVV/vVx15rKXOi+SyqkvlttiX5t3+f8A2WvXpRjKn70jmlCUanuxK2r6vrWtT/btZ1i6v7lV2+bPJv8AlX7taeg+FbjV7aabUrW8Xy9zxs6+VuXatV/K0VdEV57vyLlf4VVW+Xb8u5aveG/EviVkk0/T9Q82Jm+67fMq7f4Wb7tefPllH3D2MPShRqR9qMvvDllBCvlb1WTd8q10/wAOPEniP4b+JV17w9rH2e7jX/nn8k6q27ym2/wtWbDc2GpxQCK9tbWNmVfNvpPKi3N8v3tv/Av92tKTR7Vryf8AsjXdO1SBV/eS2zN8rf8Aj1edbEH1NXD5Ta/ulnUfG+uapqzarrFpcO80jS+f5eyJmb/2WsS78U3zxRCOKGZ2b7tizbq2rX4iJpuiQaU1v9ogi+WNtqutWLfxvZecsUGmQec33VgjVpF/4CvzLX0lLIcJOMZzrRPzLFZhXhVqRhR937JUsdXg1Q22mavpV1LHcfKsVyu//wBl3V6FdeCfhlBYROvi13njXY1nZ2Hyq3+8y/8Aj1edaxqutXN/JdWejyt9mjVWi8tlb7235f8Avr/0Kq11pGtqnlJtTz9vmeb/AOPMvy/d3f8AAq8LFU5YatKnSl7p6GFqSq04yqR5ZF+40/TJdVneKK8ijjk+aJm2r93+9t/vfNWT/YM09stvLqsv7j+633m/hqe60WWB7aLU7uJLZo/min+TdUF5pUWnzRW9m8H2Hcu5ZW/ib+Ft1RCvI7Y8v8pPDosUVgyT3CbpP+m7f/FV2Nq3wsttNsop9HeW9jk82Zpbn5WXd91dzVxWv+CrO9eC4ku4LeVVVJ5d37v73/oX3v8AvmsT/hX8izttkjeP/lntb7392uiM5cvxFctP+U6zVrbR9T1W71v7JYRQR36rbWdm3kLt8pfl3fer6D+Dvxi+GXgX4Xak8sT2E93rU91/ZlirStB+6jiXczf9ct33v4q+W9V8J6bFpVlp9tepF+8aWbzZP4mVV/u/d3K1U49M+zXMGlT3aMrKv7rzPl+997dVRqyp+9GRhOlzH3J4i+Nng/xx+zx4ystKu5YtZk0edPsN18rfMu35f733q95jgS2Tyv4V+SvyyvNF1iDUo/7IuFuoNq7m+0ru3bv4f92vVND+LvxKluJJtX8Ry2ttH/zy1GSWRv8AcX7tdVLH/aqnP9V/lPufxF4m0TwroMmsa9qEVlYwLvaVm/8AZf4vvVynw/8AjP4C+I032fQdT/4mH/PjOu2Xdt3N/vKv977tfGPxF8e2/ij4fML/AFPxRqNzHO0sd59rWWKT+BV8pl+Vdu37rV534P1zxV4T1Ow8UaPavE0E6vA6s21m+98395an+0eb3o/CTLCyifd3xE+Jvh/4c/GBtY1yV/3Hhz7PDZq372dpbrd8v93/AFVcFqX7VvgzVdBu9PvvDmqQR3cflbopIpWXcv3trfLXzt8TNf8AFHj34m3/AI1XSp1gu1WK2igkadV27vlX+7/u1wtxofiOxeS7fSpW8xf+ebfN93/Z/wBrbTnjJS+EFQkesapff8I58E/DOteGPGVxeRahbf6TavJAn2Sfc26L5V3bq8X1bWLi++94gvL/AMxt0kUrNt3Vq6lpGvNoGm2FzZajLDDHlbaO3b5Wb/dWuebw/qYvJEu9NvraKNtsitAytF8392uCPL8R6Mq8pe6Rq0sVh+4t1+X71XrexlvrSOV71PMaTYqbv8rTZbXWNNu/stpp88+5dyyfZ2ZttXhF4klgaGPT7qe4lf8AdrFbszbv9laJ+98JgX/D+p2qwz6PPbtB/tbf4qwbuDUp9dlihE8iL90bdua7f4dWt6niRri7VIFZf9VLB99v/sWro9btJp/iJqHlArHHEilpF+XdWcfdkbwjGUfeJ/DdnFrmj3MU8TK0f+rZW+81W4dBl/4Ri7t76LyJLaRnVmb7tN8Ns+i3k7yxfK1ejTLaa5YfZ2i+Wddkny1x1ZnfGJ4v8SNM+zWekRNsRf3nzf7yxNXFabAi+J2eJ9+2Hb/31XrnxmiiXw9o21Pu3bJ83+7/APY15ToapFeTv/FXVQn7phOPvHX+DYora5ubdn2tt82utj1O+i0dbKV/l+/t/wCBfxVyWk+VFNe3e/8AeyQLuVfnq5ePcLNBd738ueNU2VEjSJt6Xcp/b3+zOvy7f71dNHBaeSt3Ls8tt26X/gP8VclZyxLrdtFs27f4ttdR5sUEK2jPvjadd3/fVZSGefaxPd/8JJexf2hK0Es6ssW7d/CtdTcRW8/g/wCzxaZayssezdLbK7Vxvib5fiXdxKmxVjXa3/AVrtvIuF0G2eJ2lk+Xd/DWspy5SOU5C3s9P/e2i+HNNllX/p0X+9/srWkkF7q9tHbrqmqWbWjNutbOdbeJF/3WVt1b+m6ZbpqXmpsikZW3Vha5cpp/xFkdfk3QLu+b7y0QmHINuLOKxmli1CW8uv3e5fPa2fb/AL37iq32HRLazW9j0rTnaRdyxNYMkrMrfd3RSxf7P8Na1rp7z63cvP5v7xWf5mqW6g2wqku39392j6xIPZROKHgbwrrlxczz2+raS3ltL+6k3xs3+15vzUlh4GsNB1LzYPEb7ZF+baq/+ytXp9xp1veWcjr/AM8dm2uEsbxZd1lLF/y2ZN392qjXlIn2USZfAfjSC4Vk8b232W5Xftldn2ru+67fNt2/7VRTT69Y6y32n+wL/TmbyBPHd7GX/a3NtX/gNdD4gW0vPh79o099k62yq27+La1RWdsn/CHt5sMTsvl/Lu+9833v92n7X3SvZnHXGn+K/s08q3EsEDSfu1aaK4Vv92tn+15tMvIIp7SKVfllVmttq/3W3fN/vVu69B9ptoImilRfsX3VbZ91q5KSxtNP8T6l8krzyMrrAzblZW20c3unPOBt6D440KzuZ7iLR7iC5X5d1q33m/ut8vzV6NJqtvc6JbPq/h+eBpG3qt5aN8u7/Zl/hryXzbTTJm+T5tq+Zuj8r/d2/wCf4qdr3jyK00GO3WKefUrub95LK33Y/l2/N/318tZLm+yTE3fFWp+Cr68bTLzwvFLKzN+/tYfKiibb/d3f8CqOG5+HTeHlS50KL9+rbZ/Pbb5f+yteb27S21/JdzvtVmXzIol/vVZ1RtH1yZngu1iuWbbu/wCWUv8Alf8A0Guz3gnI6n+xvhlEkGq/YIJ4mZt0X73av/j1QaPbeCoLbzrbwrvjl/vySyrXBTeUrtp9pt3R7du35a6vwt4OvdRs59Pihup54GWeeJJPK+Zvu7fl+Zan2bj9omMT0W6juNX8Kw3Evw18P/2bGvyzy233f9r5fm/irmZn0iDxJdyywRaM1/tlkiibavzL8u1drbf4V/4FWnYeINnhGDTYoLqB1vW8v7Yyt5nlKu5lX+Ffm/iqRdBefUoNb0yyVdU3b5Lm6ZVin/4F/E33vm/3f71RSq1ebmkX7Gny8vKYOn+FfB+q2ct7BqdxFPbSeVJBPIz/APsv8LfL/wACrXtUt4Lz7b5USs2391FbLFFt/wDZqz9an1iXxJd3H9m2tksvyXcUEnzbv4pdv8W7dU9rpm7xIsUtxBcRyRszKyt8rN/Eq/8Aj1ReQ+SJRuIruBFeB7j7N9pZfPn/AIlb7y/L975WresfD1jYwrdNrdvqMs0ceotFebl8qOVdyqv8Ktt+ba1QfZn0q8li+f5m3qzQN93cv+9t/wDiau3mq6VPqU/9mJFeaezLFHOsmzcq/L8y/wATbvmrQshGpeG9XS40WPVdHlktWkuknlkX/WL/AA/M3zbl+X5fm3bf4ay/Dtn4d1nz/wC0Hin8lt0kcE/zL83ys27+621tv8VZV54c0rTPEa3Fm9ql3+7fypW/1S/Lu3f+g7aj162/0yy0fRbeWDzbtrpbqzh+b7u1tzf3fvVXKSd9Y+FbhdVvtM0zW7efUGgae2X70rL/AAqsX95vlVf96uF0td2pSXf2i6guZGV/sbx7NrL975f8/wAValxrVxbQz/2fdwTzx/vY3i3J83/7K1hXF8+uaxba3qF7dQQNJ+/3Lvafc1Ryi5jdhvPDmtX/APZmpXFqkk/7rzfueV83zN/u7dzfxV0mseCdEnv/ALbpF3vg272lWPyol2/L8y/N97arbv7tc9Z33hqL4rwW7WlxFbLGrRy6iu3yo/8Anr/u/wDfVelal8O7Sx8fr4c0zW7jV2kslnWDRGil8pZW+WWX+8v/AMVuqeUfunnfiTSNYV9Qvbm3sPlm8r7daq373avzMq/L+6+Zfm2/3afp+kW9s9sl5b6ddW0jebJqcDfv/vfdibcv3t33f9mvXPAPw+0fxH4eki8bSyr/AGbfzwW1jfTMrbV+Xa237u5lZv4v4fvfdrzvx14Mt9Is1srHxRA9yrT/ALpW+W2Vf9V838W75v4V+7RL3SocpmtFoOkTW2hX2lapZMrNL/abRttbcu1Ytv3f4fvbqy77T7ieb+z7OWJ9skfyzyb4l3f7X8K102n6raWOmxW8uj3WvWN3ItvZK8MtvLK38UsX96X7v3d235flrP1jSLjT4ZEn0e/t9u5IPKX+JW+bz/8AaWkBpWtjrGlWzRane2svmQx+XFFN5q23zfLt2/3v+BLVSF7iXUmTU5XtYIJPPaVl81Vj/hbbWfrXiG0i0GDUNF135Wn2tFdQ/wDLNf8Ax6ri31vrUMXiNbiVI1j/ANJRY90XmN93/a/hagC3Y+Vffab2XWFuI92+GVW8pf4vm/3axNUe3g/dLNE32mTes7bvP+ZdzL96mx+MdE/4Rj+yp7t31JmVVlnj+9/7N/wGt+31fR9S8i4uZftUjQ/vPPbdK3y/e3f3fu/eqY+6BSjb+zLmNNIvb37rf62Pdu/z8tVNNvtQief7Zp+mpuZvnZm3fd/2f4m+7W/o62l9crexeI7CL7Iqtc+fd/Mv8K7f733v++VrPmubi5uWis4rCXy1+WKKT7yru2s3+f7tAGXN/ZlzNaXbeb80fy+UzeUsisy/3ql8tdVffcyXMMcXysbFl+b/AL6/4DWpY6npkt40W9dO1Tcrfe+Xb/s1Wvf7PfU5LS+1WytW+Vv3Tq38P91aA5TSkge5Rtqf3fuV00M8Vnt3oqL/ABNu+78tZFvbPBC0O9m3VUmV2uba3S0e4WeTytrfdrjPQKXxci3+D9PuPvf8TFf4f+mUtePaO217nd/er3n4raamn/D2RGlSX7NdwOu3/gS/+zV4bp8e37S9d1D4Tkq/EaXh2eVvEMlurv8AvNybv+A12M0qS2EVk0XzR7W81VrkvD9nu8Q2jq7ovn/M23+HbXomqaZd3Nsvkbf4f/ZqKoRMtd8Gtxy+VK3zbPu10d9Ft8uVUdWb5/l+8tRw6Qn2O0SWHzZYJN/yr8zV0lxpVutzaeb5rszfNAv+q+9WEizynx1F5Hjy7835ZPIj+7/FuVa63w7vn8N2lxbJ+7Zvs6qq/wASttrnvipFbxfE6fyPuyW0G3/vmvQ/hjYxf8IN9nubfz4t0j/P/D81ay+Ej7Rm3EVxFfqjWk6S/wC1G1cl42s7vT/G1l9s+80C/wDfO5q9st9I0eK8W3isrXy1+Zf4681+NX7rxDpa7F81bRl3K3+1/wDZVlEuQ6Oz82aCWD7rRtUuqaf5ttH5vyTyTLFtb/datbwbpV7c2EEvlWu1VVvmkb71bvjbStV/4R6O7sXtftcc8bqrL8v/AH1Ry+8UYTaH9j0q7RZf3i23yszf3VrjPBuivfal5U8S+bJ8m5v9quzt7Hx7qsy7b3TbJW+9tg3151p/2vw14ni/tN9Uv9Nj/eyMq7Fb/Z3VX90ylI6jWvC8ug+GL24Z/wB20bfL/wACq34bnsp/BkFx86/Lt8qXam7/AL6qyvjTQtQmkTTNKVormNrfzZV8ryF2/wB75ll/8drlNS19NBvNP0rxLolve6faXLT2nkfJLKrfKyt/wH+KpkVz/wAoviLxLp8viS22vLbqsH2eRvvr+9b7qt/F81YPiDRdQ1DW28R/2ZdS2ltA0ttfRfvf3a/L8y/w/wDAtteleH9efQ/t0vhzTPsWoSK11ZK0H+kwW275dsrN/d/7621y+k+PdVguWt7my+1eYzXDNEqpukZvm/8AQaOb+U5pS5viPM5rt1vLmXTrK8+zK2xVZV3N93/vmtDS/wDiutulXyJazxq3ltP8v+fu/wDjteg3kVxr00UWi+FJZ/Mmk8/aq/3vm21ZvvD3grSLBns7jbqlzG0U8ErNul+9uba3/AavnjzEcsTyK48NXDPPZRXrrJct5UcW3dub+H/vqrq+CdD0rS2sr/WL/wDtSZMSXUEP+jW27+D/AGv4tzfL/wDFd5deEvCEU8Gsosv29Y127JNnlyK3+tVdzfd/vUyTwr4d1WHUruLfdWzN5skX2lv9Z/F/FWvt4/zEHC3nhjQfCs63EXiD+1IF2+XLPaeQyt/d27m/9Cq/pPj200ia0TTEv/IX/XRNPv8AN+b733flrjPGlw8niCawl+RrdV/i3LXMLLL/ABOrf71dUY80feA+jl8Z+FPEN5bJeaFBpflNuW8gk2Sq38PzfMu3/tk3/AqqSXbtrcCQW8SLHctaw3kt/wDup1X7rMzbfl/3lX7teHR6vcRJ5Tf+O/w16F4F1yyvLz7JrWoW9rZRqrySz/xLurKdOMfhNeY9F/4Tjw/Bo6yretK0jbb1bzbLukVvm8iVf4flWm/ZtP8AENhP4gsdTSJfMXy4p7RklaP5fN2/dibbu2/e3fN/FWlH4M+HWqzaJaaZrsWry6pC27zbDyl3K3zbWVf7v8P/AI838Md58O/CX2xbG2161s/3KxM33NzRfw7vvbt38O3b8y1z/wB4cpGJrWmWV94k0uWLT7hLawj829ilnbbcs3zbZd38S1Bp+g3F9YS6fYypEyrI6zt5UTf7W1m/2f8A0Jq7y18II1nHpUVwkW1VlWV5GRf++t38W5flqO88K/2HctaS3Esvl/vWuk+aJv8AZ+7RzS/mJOCms/8AQGstQSe8kkXypLqdvNnl/i/9l+9UOj6HqsGpXLt4gnWNY1SFfMbyNu3+Jdy/d+7/AL3/AH1XY6l4au9XuZdWW9do/MWWN7WTbFK3y/Lt2qv+zUDeAru5dtVl1Oe6WBl85JV81tzfN8v91qOeUSjG0PwFZX15c3dzqCf2hbMz/vVZVnjiXczfKu3/AGfvfw/xVk33h7T9T02LTLyJvtazfNK0mzbH/DtWvSpvAr6R4DluPEtxFeX0H+lLBpzbd277vzbvvfNXErfaZ4gubu4l0rWbLWbu5XzLqVmZvLVfvbvvM3+zRGYpHV+EfBmhQJ9t1zXdNslVVi23lz5VzLt2t/db5f4V/irmtT8JWlr4kj1fw74nsNM1O3aW6a9sYZf3Dq27yItnzS7vu/NVrUPCb6vZqmlaw11J5f7xZ90W1tzL97+7/wB8/erd0nQ9T0jR4LvVUWC5ZW3LF97a391WZd38VXziHSeMU8Y+M77+3vEdlpbXaq80X2KS3W2VVX7rL+93fL/49XNeLbTwRovhnRxp+q/8JDaSSPBJON2nR22z/lnK33tzbvl+X/gVXY9DvfGNz9r0/T/7JuV2xQxX9orNA38S/wANakOleMNK0S70zV9KtXtvLaKDyLnY0En97av3v93dVc38xRz2hz2kWkR+as7tBbt5FtFcL5sfy/dl+9/Dt/i/irilttbudSa3aV3gb+C6Zl2/7O6vRtatvECWay217Lb3as0W37/lfN8yt/s/w1hSeEPEdzqt3rH9ppt+aXyljVYoP9lYv4amIHF/2Zrd8jaPc/ZYrSRvP2r8qr827bu/3q128L2Wg6PAjSytczrvjiik3bY/725tu35t3/xVdbJoOq3NhHqq3dl9pZtqtKu3c21v4Vb+L/2Ws3/hHvEuq6PBcS3tvbzs3lL9lhbcqxf3l2/KvzUveA4LZ4gW5a4TSvNlgZkbz1jlZVrX0P8AtW+eV9QtIIP3cm7zVVNqqu5vmZv4ttdrfWOp+Suma1qt19pto/KbdPu8rd83yqy/L96jT7bw5BCtpfRX87SWy7Wl/dLE33tzblbd/wDZU+YDir7Sr3THW0g0qBIL3asm2RYm2/7y07VvC8un+J7S01PTLe38xVl8/wAxvKlVvuqsu3bXdSaVpVz4kgt9MeX7Cqta+VdeUnmttb7zL93727/gNaGm+F/D8F4sWp6nBuk/1e2RU+7/ALNIDydtBGm2/wBt09FaRt0qvLcrt8tf91f9lvmpXsL+9guHaysJY02yRzr827+D/er21fAXh/7SrQJeXFssmzdFt/8AQdvy1ijw7FpekzXk9vq9uwdYo4/l+7/3zU+8BvqvkJJLcojLt+7Wfayw71i+63/oNVIdetFRkur1927b8y1WuNX0qC8aVrh22/Oqqtc8YnZKRpfEqzeD4Xak8/yrugl/8irXzxDq8UE0qNL8rf3a988c6sviD4X6tp6b9rQr+9/h+8tfPFjodpdald2Xm7ZY2+X+61deF+E568veO68M6nbvc2m2WJmWf5vmr121g0xZlln1BUXy9m1mXbXg+l+Cb6N9++LzVkXbt2/NXr+k/CvU76wZtQ1VEnWPeqxR/KtVOJMJ8p2emwaVFcx6h/bdh8v8PnLWlNPoiuv/ABMLdmj+f+/Xl1v8N/Ef2n7J/pm1fu/vPlb5q9L0f4W3Ft4htPtN7dNGqqsjRTsjK3+zt/hrD2RrzHivxgtpbr4oxalovm/ZvsEH3o/vNukrb8I694osfDH2RrFf3k/lK3l/3tu2j41WuleF/ipFp6306NJp0ErS7mfzNzS//E1qfD/xDpS2Eujy3CTyt5c8fm/P/D8taT+EiMveOm0nw14l1WzguLnXfs+7a32VWZPKX+Jdv3a4r4weHP7K/su4+2yzyyeYrLFH91V2/wC1Xpl54vsrHwwt7BdvFFH979w3zLWJ4ovLfxRYQW+lXafaY90rK0bfvaw5uX4TWRxPhXxjDpmg/vXvXjgbZuWP5d393d/err/EV94j1XwG0vhrT7y6ln2yxxL96RVb5ttc74g8PWUGm3P269lRpFVPsu7zYt395l+7/wCO1j+H/GfiNbZfCmlahqlrbbflXSZpLVl+b5mXytv/AALd8tXCXMI6218bRWKWKT6hcTz3cfy+Qu3a3y/eb/gX/jtZvizxxpmp+CdQ0q50pbiWTdEvnrullb+Ftrfd/wB6s+48J+JbvVbG9vpYlWBmRpZ41dZf+mu1f4W/3t1dXeeHNYvtSltNMSK41C9/cSajLJvl/wCAys38X8X/AAGo5fe5iOb3TyD4f+D/ABS+pwWWsxXUWlzLJIs6HzNsleot4e1uxubTTJfsuqT2kMlv5SLA3m/vfml83d8277vzN91VWu98O+Dtd8e2093pF7dalPZTr5cDLF5Cq37pvmiX5W2/N/d+X+81H/CvrS2h1L7dFb6XdrIyQJeQNcSsy/e+Vfu7m+7u+98v3a15pSkR9k8a8YWfxM8ceJLS30a1/tTyIP3XkXG/duX/AFS/521qeBfAnitteg/tLRXfzI1RolkV9sjN/qvvf3dv/Aq9j0XwPaQW2mxanpVhcahHHJcKsvmwRT/+PLu/iWrcN5omn+FZNM0/wkvhyKOTatrp0nm/e+bbu3fL/wCO1fKZcp5j4mbxBbQtFoNpsu4GVLuK63RNBtb5VVv93b92ud1rQ/HdzDP5WiJFdyR7rmWW5+7/ALO3b95W3V6uur+EvCfieDU9Q1LRr1YF/dxS7tu7+FW+b7u7/vpmqW11zWPHHidbjQ7iyitpWaWeLzJYPN27l2r+6Zfl/wB7/wAd+9EoR5jXl5jwvw94A+IzTwfbILO4S/gmeOBbjc+35l3bUX5f71a03wf8UaLpV3by6q1grKrqzRt827+H73+y1ei2PjO00HVZP7VSL7XHHJBPFKu+Lz127drL833W+WqjeL7f+1ZX+23Ty2224WK1n3tAv95mqf3fMZQ5TwfWPAIn+Iq20l79vht7VWuXiVV3SKzKyfKzVi6tZ6FP4hjt7XRJ4vMXayqzfer16S2/sPVZ9TgiZ1nk3t/sr83/ALNVu+1DQt8WsLoVvPLG2+Tytqs1TLFS+E97D4OnynjGpaZ4f028fQrrSrzz4PlaVWrufAHgjw4uu6nDqd4IrS4toWtDcqv+15n+63yr/wB9V2Ml94a1rVZfEF54aa3jnkZ1Wfa7L/u/7NZuqaf/AG1fz6x9oitYLS2+VYPlb/eX/vqlHFSIxWDjCPMa1n4X8KaZ9ke+1W6T5dq7ZGi8hv8AaXdWM3hC9Wa71XRb1biOCTdtvJJX8pf7vy/8BrzW+8R6lfX7I9091tk2L5rMzVesfGdxbQx2n2h2gaRdy7qz5qn8p4XtT1HULHx7ePBe3m9vm3bp52RWX/gX8X+z/s1RsZ/GC3l3dzy3iRtuSNoPl2x/99V0mny6rr3huC40qLS1nn3LBF9zb/vf99VoabPqup37aZqujq0EEaxW32WT/VNu+ZflX5l/hrb4ionFtrWqteQWTeRuWPY3mr97+L5v9qqUevahbaxBaRahZSxfKzfNsVvl3fw/5+WvSNc1W90izax/syK1gaeNPNsZJYm+X+Ld/E3/AHzXH2vi/wAKXNm1vPLO8q3PlR2d5aSPK235tyrt27fvfeb+KtuU1K327UIHuXXyrhpP3vleezL97d97/wBmq1Z+KtY+wf8AHutvuuVlaKXa6/8AAflrUvNX8D3KM7Jbp5iyMsE9h96Rf7v3dv3qmuPDiXlnaeV4fisPNXzViup/37Nt+Xa3m/KtHJEkoW/ijWP7Yit4rSKVWb/fbd/3zWtZ+L/GraxL4avrS/RVZolXy9vlQNtb5m/i/wDQvlqppvhy0s9S+xX2mW+3y2ZZYrlpdu7/APZat1bPW/tMf2a9ntZ5P9Qt0rO33d33t1EQDT/tenw32oW2oWEsCt+58ppG89l/i27d33t1Z+oa55HlahrkU9ktzD+732zblb5f+Ayr/wDFVUXQ5dDtpXsZbXy2kaXazSeV8zbmZv8Ax6jVvDV3O+mvrktx/ZEk2xlWPduX7zf738P3qsDds/HGmXOtr5txLFcz22yCeXcjS7l+Xav8NVodQiVJHn1Br9p23tdLIrrbbd3/AHz/AN8/w1gSeGrdZmS232tzbTM0N1FJ83kL92Lb/e/4FVS68D2VnDc+f9ts2aCP5Vb/AFsbL/u/53LS5QOta80xteays0SWx2rK088m2WD5v/svurUlro/h+e5vtVW7up5Z2+0SNLGzxRN83/AvvNXE+H9M/s/TZ7L+z4tUg3f8fV4y+a0jL93d/F8275qls9QvbbVdQ0+XSr2CBfMuPNtW/dM391dv3f8A0H5aYHSXkV62pS3C2/lLOrMzNAsUS/d/1rN92nM1ksNzL/aEFqvkK0e7bu2/d/iZV/vVwVn4h8QW1+39q6heT6esm5YLy5nn3Nt+8y/3v7u2o7rxLb2LwPpniN3sWVU+xz2UsTS7vvfN/Dtl/h+61KIHfyeIfD9zDHFLqtvb/wADM237yq38P97b/wDFV0kf9kxJB58ujXtysC3X7qCR18hmZV/etF975W+XdXit54osfsGnxXNwupLJuS5iurTZ83/Adyt/e/hptr4j0db+K71DSlvYmj2NBLA3lSqu1VX5WXa37r71MD07+0LSK/l+w639ltlnX91arF5X95vl21py+Ibe7MVvBr4eWeeSCOa0tplaJlVZWX54tj/Ky/MrfxV4LZ694Ugee7XSvlWRm8j+Lcyt/rWZmZl/hX+7/vV0elajo/hvxesE9ymlNEBcR3Fxe3KyxeZF82NibcN8v8VLlApbdQZFllt/KVWX+H738VT6bZ3t94nkRdsvmfdWWNW+WvRNQitPOX7rLF91dvy1m/bLLTNt6tunm7vl21gdRhatpmoT+A9SvZ5f9Ggtm+XbsVa8l0O2tNQ1X7PpkX2i9kb7qt8zV7hqmppqfhjUNMldUjkjaJfm2L8y1y/g+0v/AAh4jk1izt4IjcwrFPLFDA/+8jeau3b937qq3+1VUqsYmNWMpSOUsYJk26xbWl01lbXDWrXkEbNF5/8Ad3V6NY/FK0s9S/exSvJbR/vPIVvlXdt+Zf8AeqnY6rb+HJtd1OO+tXk1aOSW00zQJPKWBllXb5sUDeUrN/tVU0C7t9ev7u4ufCU9hLJ58SvEzKsDNt2y/eXc3y/e+bc3zVfxSMKtX2cfhO9tfjFpU9/FbxW9wys32dm8vbtk2/N97/ZrrdN8Y6hPbNLFpnn/APbzFuX+791mrwHUvh3p6pd3Fze2cX2ZlljX/W/99f3f/Hq37HxVp66C1ppD/Y7uTajXVr8krN/Du2/Ky0Ska0oy+I6Txdbah4l8VT3vlaWt3HHHEtrdeYksSr833vut95v4f+BVyuuNaaVZ2X2zSrVNQgj/AHE9q38W7crfK33vmrm9Q1PXb6/uX17UN7eWvlyxNt2/7X+zXP2qeILzxPpen6fpt/Kt20cSyvG21dzfLLu/8erLk941lyxOmvPF13pVlbWk93dW8jN/o6yx+bE3+9/dqe31zVdT1K2is3f7XJ91YF2ea1d14L+GUtz8QoP+E28P6Xq2mxyNutbq9ks2XavzfxKzMvy/e3LT9cvPh/Y+GF13QbvWYomn3NY6nHtlgj/uxMsTL/31VchlGqcba6fqGtXltcanK9rPub7bBLA22L5tu3cvy/3a73SfD0VtpWof8SyKWSRVRXg2/MzN/Ft+Vd396uX0uLxLos1zaQaxZRQTzbPKbTllXb95Vbyt33vl+atLQ9B1jT/GtlLFqcv9pXdt5UawSLKqs397d+6Zt3977rUcgX946hrW9s7DUtKbQp1j8yNbaVv3qtHt/e+Uqs27+7822nSaZaWPh6J9lrLPcsz7YpNq2y7v7v8AwL+LdXK3SeI4NSsYdT1uyltrC7jt/mj82dW3bf8Alk3/AH1t+7W34gvNC8JzahoWvRW9+usTL5c91H5vlSM7N+6l3ful/wB7/wAeqiPiL9vY3vg7RP7Ynu7+30bVNthbLBc74ruT7y/Kv3Wb5v7rbV+Wn+KNai8L6C2uz+H9O0SO7k837VBYLAzT7tvlL5W3zf4vvbq5bxlq9x4M0rS9K8OSyyy3dzvmlijllVV+byvlVf7v/AqzbzXtYudVstP8UWV/LBLtlja8gZIovm+X5f8Avr/vmiUpDO70fVZf7Etr3w5cXGrTwLtkiTz38hvmZlX5vm2/L8tZ8l9Lqt+t3feHILqK9n3xzyx+Urf7zfLt/wC+vvf8B3Zv9q674Q8WXNlofkf2Nd2UiKljJIn2mdvm+7t/2du75vl/3q39L1XSp/AGpRa1e29vfXMaxNujbcrMy7fm2qtT732iil4Z8E+FNP1VriD9xfTsqW3m7r3z933vmXdtVflqzrl5LpHiprSV2W0jtmZbW1kkVblv4flbazU7UNBms9H0/ULa4urpVk+zqstyqS7WVfur/wACb5qwG0PU7abUNQllitbuC9gt/sN43mt95f4W3bl2/wAPy/eqvdDlPKfFnipLzxGt9FqDXUW3Z5H2doPK+Zvlb5VVv+A10/g3xZZXej/ZNa1LyLSdvI3s3yx/d+Vv/Ha0r/wZ4g1kxW954Pur+DUf+PJtMaKXbGy/NKzRMyr97+9/DXUWPwGTQ7yx23HkXO5re9tZWWdZY2/5ar/Du/2fu/8AAqSwXtfeicvuxKPixtdufBn2ifUNOl0ZW/0SXy189li+X/W/dZfmb5fvV5Vef2JeJ5tzqaRSr8u1o2evUfjB4X0zw1c+F9C0hHi022gu59qKqq07eUv/AKDuryO+0+0n+fZurPFUvZVD3MunKdPmNrw3p9pqeq2mn6VqEVxdyfIq7mii/wCBV6B4s0FLFL3R7HxFFLbW1t9njZY/K81vl+80q/d3f3f9mvMhLL4c0KfUNE8qC9gXzY3ZVf7vzV75oPhXStctl8R30r7da0uO4tNqqksu370W5m2/Kzf7P/AquhSlU96JGPq8vuyPnrVPgj41ttHXVrv7G8TSLuVrlVlZW+6yru3NVLS/hPr2p+JG0ezuIvNjg8/bu/5Z/Lub/wAer3LVPCHjv+27K3tta1FdQWw32WnS+Rt2ru+bay/Nt/2vm/8AHa46bwrqdzNL/afiO1s1kVbWSJbTYt227c0rbW/4EzfL/DWs6konl8sTft/CFxB8NP8AhH2+yyrLtdfNVnuYG/667tu371dJoPi/TNMs7lGt7LTWj8j7Tp0CyOrbV/1qs3/fTLu+9XmeoaR4r0N1t9D8US3kEH+kN9h3fN/vbv4fvfN92ubup/GfiG8tHi0yK1jVVt/P8mRIp/vfeb5l/h/zurKMuf4S5e6e3Q/GS3nv47Sz0z5Y5/NtImk3wWzNu839192Vm/h3fKu6ra6gk/iSV59PspV3R+XawWyxQbmXd/d+9t/9BrhfB7afZ6VBqutOtnrLf6bfreful+b5ovu/3lZfl+8u7bWprXjFJfDFlqF9calatbKrwtLpa+Vtbaqr5vlbm/4EzVfLy/EKJb8RWf8Aac1yumaZ5St8ke60l2xbV+8zMqq3zbvu/wDAqwNc0/W5dK82e71G3u1jjVdVtY9is25V2rEv3fvf+O1uw+OLS8+HttF/wlEUWpNesis3lbd3zfK0TLt2/N93bWzY+JbT/iW6rrWmWE7L81zPPHI7LG23cyqsvlfL/tK33f8AgVV7ozlrFfEHhpLt4pb281SWFZY5WuWRoo9u7cqr8u1qg0nV9QaG5l8S6xb27Ltl2zzLuX/ZVf4v4flrXj1rTLnxzcyxPcX9pBcx2arqbfZf3f3lVfmiZvvNtVdzLu+7XaQ+FfB+rpc2+nyrZWUayL5t1dwK0n8LblZVZv8AeVv++aOUo4b/AITX7Gmm6ZeJezz/ALxrm8+zL5Xlq23/AFW3/eXb/FWv/aeoarDaJLrtq1tbNv8Asqq0SxRt/FtXd8zfd/u1mw6Vd3z3ztaaddLZRtcRwQXbXVzPt/5bsyt8q/7396smFri+8bK9tol40S+Wkk/kt8vm/dX/AD93/ZpganhvxHcKl9Dqtx8rXaxLE21/I/79fd/9Cq7cahpWlJbS6ne6zaywSb5IImV28tl27Wl3f+zbq461XXXeWy0FIrq2jm33N5eN5TS7f9Yytt+b7q7dvy1dkaW8v11CWJbBZP8ARb2ztYPNg8v+HcvzfN/F8393/ZqgO0vv9D0G2u18i9ufMbyZVbc25t33lbb8vzferItdTuNTv57KXSr+1j2tt82Pf5DRfMzbtu6X7v8AnbWBpXj/AF/StVvbRreC1trlWg89bhbplVXX/W/xL/n5q0Lq81DUEi/4mF75UE6stisDSxSs0XzMsu7ctRygdRZ61omufZtCtvBl/ey2zf6TqMX71dyr/eZfm/4DXPatc+H9X8W3OmQaJpdlF5jK0DWnmraeUv8A31u3bd3+9U2l6qmizLFpVxqkTXMDO0s8bReQ21v4VZV/usrN/DWS2uXti9tZRRPeXN+qvuWdYm8zbulX/abd/tbqYDrrSvCU+29vkglgaPzZ/sce1W/u7V/3vvfd/wDZqrSaH4c1WGC3iuLrbBG221VmVfM/2dvzL/F/3zQ1naa9ptpafa9U0hY1b7XdTyN5SruZv4Yvl/4E23+KpNJvEivJbe+1CJrSf/WS313v/dqrKsTf3WagB9j4X0fQXuZbzSor+0ufmbz2adopNv3vvfw/e+b733ar33gfQ7uwuIp/EWsXBSRZSGVcFW/uy/w/w/LXUyaHZXnhWx8QaRcTwRNuWCDUY9u7b95V27l3fL96X5f96sO00CaWKa/a5mtPtE7FLpr12gQf3WA/dxv7f7VLmDlKM3iqK5m2W2mX77vnX935X+7t3VRvL7WLx49PaxitZNu9fPnXd/3zWhHp+gxIr6hqq3U6tv2q3lf7q/LVbVPHumWc0kuizbdvytu+dW/z81cvvHQVo9F1Nvnnm8rbH5v+zK3+1/s1Bby6npFstvPqv2WDdv8AIa7+X5l+ZdtcdfeLNViSe4tkiTz/AOFfkq7orah4h037RbI9427yvKVv3rN/Cq0SpSMpTjE6lfGcNjc+VpVvt8v5/ljVF+auY8SeONQlhli81/K/haJvvf3quap4Q1XSLa0u/wB1eee0izxWMnmtbbf723/O6ub0/wACy6vNc2897cNcxyea0EXyeQv95ty1uox5uWRE6vN8IR+KTdWT6bLLtmuG2xwRLvaT+7Rpui6qszXE+n39r5P8Kwt5u7+H9195q6+b4fW+kaPvn1CLTZ4GXy2utsW5v4tvzfM26ursYre+sFu/7Q1S62sqfuLn5vlXb+93bmX+Jtv/AE1205e78IRnzHm81i955975txb7l8iT7dti8r/a2t/e/wCBNWzrV9ey3el2VnKreXH++WXdE3zbfLba21l+7tX5Wr1XRfCPhmzspNaiurCW0ubfyI7O6byru0m2bmZmZtrL/uqtYFj4Mfx1qsv2OKK3XR1jl+1TstvtXa3zef8A3v8A0Gt4Uo/aMpS/lOP+zeO/EHn6JPdWtxex/wCmeVfXKo0W5drbVZl+ZlXbt/3f71T3kUXhqziTU9T077XHc7/svnfuJY2+8277y/N/s/wtXRXOh3HhjxRo/wDaqXU8FyzbtTkk+0NIrMu6VPlX+H+Lytvy/wAVdjN4ctPEPgaS7XRLWedoJNs63KxL+63bVVfvMzfd+agI8xl+C/FVlqfgm28D69p+lzz6pdyM0unRs1zbL5S7du3+9uXazVyWuaLrGmX8vhrZqWjRq265il8z5Y1+ZWaVW/hbd/d3bmrpNP8ACeheLE8P+ZqFlZz+XG92sth9o2q237yr8q7v71O8ba14caGfwv4j0+9vb2O7/eLa6j5S7Vb5d3/xNZQr+6TKJnxz+BF+Glt9j8Ka9Z+KLnVo5Zv7Hka689ovl835mZfKb+6vzbv92vS9cttP8VaC2sXfwS3fZJPPXU57torZo4l+Vmbcvmt93+9trxPS7rT11CLTfhhqEvhX5vtVzqMrLKqxt/d3M21ty7a9q03/AITXUPCrXdzrsV1qFlHt0mJo2eBV/wCeW3b97+7ub+GtQ5eY5a3s73V7yx+xy6TZW1tuvZ4r6RpfKWX73lN95v8AerltS8f+IND8fz3dz4c0vVLZp44murr96u2L5V3L/u/3f/Hv4ntqfi1fAcGleKtMa/stUjn+yXXn+Vcr+9/5ZMqs23/Z2/xVdvorjw94DbT9a8H6pe31/bLLCvnwefbK3zbf4dzfe3fLUUo8vxFSl/KdysHgmLxZ/bviG/updH+z+bc6fFP9n8pm+7Ki7d3y/wAO3b97+KuJj0zSrzRNU8Sy6hql54OnuWtV06+haVtq7du66/vLt+X+L7v8VZuh6B411XwZrdvpnh/VLyC//e/Zt0aSxL/yyXzZWaL5dv3fvfdrX07wl8TdS+DsGk+MbDU9A0jSbjzVVFWXz1+7821tqr833qf2TX4SaTQ9FtNVs7Tw5LdStNG14st9qPntKv8Az12ttVVVf/QWataPwrp/j2bSNbnu9mkWS+bP9juf9VcxN/qm/dbvu7f4m/irhbfw1p+leLYE0p/tHlwebH9jkjS5iZvvbtzf7X8K7q6/+2n8PaJB4cW9uL2eytt8888m5mZlrXC0o1P8Jz1avL70fiPQY/Fmj6HpUXhfwvaW9laQRskcEX+9VZdVu5Unu53/AHv7xF/75/8Asq8qtbx2m+27/mbdt/8AHWrv7Gf7TZ/f/wCem7/vla9uEuT4TzpaknxE8Of8JV4M+2wJvltv9Ihb/wBCX/vmvnS+8Oamr/Lbttr0PxRoviD+2Gu4tdv5bS2n82Ox89ootu3dt+X71Rx6rb3zteolxEv3JIJ1+7J/drw82pc0vaRPeyTER/gyOWj8IXs/hufzdnzRsrbq+jPC+npB8E9Pi/58I/Ng/wDHf/ia8u8M6Y95qra3LL/olk3m7ZW2Rbv9r/ZrUtfitd3N+3h/w14fgutNk3LJfTzsnzbW/wBUu37tXlNLlp80iM7qxlU5YnezeKtM1CaDStc0y1vLaORmXz41fyv7rL/tVymsXlvoPxp0u98R6h/aWmrbebH/AKF9nXduVV/er8vyr/DWNrk7wTeSr/w/+yrQrWnizwr/AGPqH7/y/wDSo4m+f5vu/d/z96u/EQjKJ5dKUomz4k8Y/B/RbzVPEFjK/wDaEjMsenXitLFLu/h+X5VX/gP+zXIaC2uy+D28QWemavdRfvLq7gWSS42yeb80q7f8/N/s1WkvNM0+21CaKyitbafcsnkMssVyu3/W/wAW3/dWrs3xUu7vQW0fwZ9sTS7lmT/RbZYv4l+bdKv/AKD/AHq8aKPS5/dOy8K61cav4Ga01zxH9g8+TzVtZbCJZfM2/LFu+ZfmbavzVwGpeIX1O/bTF8KJa3PmK88t5NBBFKqr80q7mXb93+L+7/wGmXnjG7ZJLK58Pz2dzG27fZqrxSr/ABM277u5v4V2/Luq5psvw81DR7l9X8O6pYapOvza1Y3LS7lX5WXyG3LE3+6v3f7tV8PxEfEamqaLo7eFYEi8Z2SMzLLBFY+RLLP93czLt3fL8y/3q5TQdK8ORald6r/Y9/K0G5bZr7zVil/i+6zfMvzbv4a2/Ar6JoPi1n2T6tYrbT3H2rVrSOWLbt3eVKq/Mq/xbqq+L5PAHiDT7fxi3iWx07VDI1vD/Zhkitot3y/x/Kyr97b/ALP3qcZFlmwmt/FOi6brt4upwavJqrQRwahYLF92JfmbZ/D8+1W+WrWteFbfxNpvnQXFklsscm6LR91u3/XVmZmZmZv727+Kup1TT7ufw9aS6Rpml+JtI/do0tiv2jU4tvyyyruVdrbf7qtXn39n+OtT+03HgC0l0v7MvntBrCrEyw/3maVl/wBr+GqAgXV9C8L3/wDY+gytEurQr5lrOree25V/vKvzfL/9jXdeGfFHii+8GazLB8Vb3Ttqt5ljeWSxQKq/88tu2WuFW20zSvCsc0st4s88flWjN5ku35vmZZWb5v4l/wA/Lt6p/ZsXhuyin8QaHe6lbWjRSJFH9g3N/wAsvNlb5W/3vloCJfsfHWt2n9s6fBb+GtRk8R237j+0Y54vPjXdul83au1vmXdWdNea7Z+D9NtNe1XSJZ2VpdtjJFP5Ui7l2s0XzL8rfxVFDq9r4esF0LxDpUXnz20bxyy363H7xv8AWrBtba235f8AvqsRd+y2lsdEtdO8ueS6a6s7TfFF837rzfm3fxVMohEs6fd2lnqstpfeEteur25X7E14rM8W1trS/Lt/3dzN/dqyttb6Vf32oX3hpFguY1gtJ4JPux7vm+625V+79773+zWhdamjalfJqeprcLG0lm08qxp57MrfvYNrN5W5lZl3fwr81ctZz3djqU9xbahcaWs8f2i21a+m2xQLu+Vm2tt3f5+WgDbk8NPrXiGP+3NTaytLtvKki3fM277rfe+Vdzbt1VtW0F7az0/wlouoJPpv2tvM1O8mii27flXdKy/6rb/eb+KqlvqUWPsl1rWk69qVvc/6Rqenbp/l2/Lu+Xcv3V+b5vu1Y0S31DxJeabrmleMG0SPTZ5Fkttcji8r/a8pWVW2sv8Az1oAoa5rV3os29dTv9Wj/wBVd2sECpB/tL8rN5q/7X+1TrrUPD99okktzolxptp+42wQK0u3+H5vm+995vm/vf3a2ZLy38Xwy6Zoun2trezq32m8WyjTbtZWWXdt2xL8v8Tf8CrnrFfI8Sf2r4jis/si/wCistq2y8X5du5WWXb8rKrbmVlpRA1NtxHbQWnhfU5bWRoP3dqv72Wf5m2/dVdv/wATXP6r4kuE1G3tr+0QxSxfvpFjZYcr6/f43f7X3q6fWNXtLm8jl8JrZ6pp93J5txFeMqrbL92VVbczM33/AJvu/wDfO2uXfS55r0yaDp8OraXcDO+TzsRMv3trqzME3NtUf7LVPKBw19qEt9DHb3KbNv8AFVGOW3sbb7FFv8xpNm1vn3NXZX3hCLT7aO9l8R2FxGrbI1g8yJp9v3l+Zflb7taGg+DvEF9oN7/pelz2Pmbb2W12vLL/ALO77zbaIfyhL3Tzv+w9dvjfo8KWDWSs8iXm6Jv+Ar96n2dpC9nbraX97b206q1wk9q0qJKv91vlX5mruo7G3s9ebT9KtJbjS1WS1W+n3WsTfN83zfd2/wAX/Aa27e28OT+DfK0zWkZYG8q9a8sGf94v3d0sXy7d33VZV+9WsTCXvfEc3a+I9T1zR20fSmXbbfdupYdiq23b5W7dtX73y/NUmm317fJ9ivri8sLmC0byLq1gndpdv3vN2t/qvu/wt/DTl1qy0zSp9PuZUnVrnz1inXdE21tyr/wGqd+NIjsJNdspj9muplkk+wqqqJP4ti/3f4fm+9/u1nyR+IqEf5TY1a88JJNpviK812LxRt8pWlayaJY2XasjKzN83+7trp9M1my8fSQNpXivw9p1lbTMv2aTda3jRfd+b+98v3ahXxH4CbR9LlvvD8Hntu23Utsu3b8391vl+9/tVziaX4WvVlk8JRzRyl1jd4I498cvzfKruyr5W3b8v+9WkeXmCRqLaW95ruzTPEuovq2lyLAst5cMrbd25vnbdEy/KtbN5qfxQ8YzX13q92tr4fspI5ZLqJoP3si/Lt3bf/Ha5230OVdNu9HvJbO3u7aP/RlW5XdL/s/7Xy/5+Wt/4Uy+ArzQbmx8TWjfbUm8+2lS4bcsm3b8sX3Yl/y1X8Uifd+zI1/FF54r16wXz/DV1qOlrAtlbajBNH/F8rfN91drbfvf7VZvg7wV4o0jW5rLTJby/nkmjZYNV/1UEfy/N/dlX/ai/wC+ad418bT6N4TifwbFE13JO0v+i/8ALeT7v73b95VVfutU8fxbtNK8OW17/wAIIsGpeTvkvNMbdBu+60Xy/wAVZSh/eKidRofg7x3ZwweNdP8ADUUuoQK0Ulq0i287Mv8Ad2ttli3fN822rek/DTVbHxtHrfxS0+y1fT2VpWgiklT7NJ97+7tl/wB1a8qs/jP4zbxtq39lRfJ8u61l+WLcv+1Xp8Pxd8S+KPAms6Z4s8Nad8sP762trhmaVdv+zt2/7K1VCUY+6E5GJ/ZXgzxf4k1TUINC/wCEegspvPtliZdtyy/LF5Tf+Pfd/i2/NXPya14o8UeJ20fT9Ti8KRaa32dvtytF8zf7S/dX5f4qyV0+98Y67pOg+BbG18OP5O9oGj33Kt/ebc3y/wC7W/fanp+kXkEvzwT6baMskH2nz5Z5P9ncvyqy/wCz/FU1fZxkVz+6beuafd+HPD3+gumo2US/ZbZtJk81baRvuqzbV3f3flVvmZab8G9V8YaV4lufC+oeF7C91RY2uFl1OT7ZcrH/AAtu+X+L5f4a4XQ/FniDxxqlzpXh97+1aCRp1vLPakUDbdq7l+7/ABf7X/Aa6LTvH/i/wveWvw/1LU7W1nWBlVHkZrm5ZlZvNZ1+WL5t396qjEnmj8UjtfEWufFhbyd/EPiOw0ueBdltpWnR7VWPd8zN8zN937v/AAKvN9Q8Vat4q8KyRW17K+l2E8cFzFLIzRRMzfL8zfdbcy/drMk8UeLNM8cHxHqXiaxtY93kT3Kwfb2i3L/rdrbdvzfw7q6jwouvxjUb3VtXmnsPM82xigVrVJVb+Not396iFKVWXKTKUYx5jU8O+B9P0O5j8R69Zad/altAybrVWZd3zfN838W35d38VcJqWuPPNq16v+tZWbd/eVq6vxNrV2+ibN+1rn5Nv91a8n1rUPs2m6y6f88NlepCEaUeU4vilzHf6LLv0eC4f5m8v/2Wur0vVfIdklf5W3bf+BLXE6Cz/wBm2iN/DHB/6DWyybkj/wC2f/oNaxIkdjeT+fbK6/eWNZa5LxBp6NC13pnyNt2yL/F/vVehvHlsI0b/AJ4f+zVEsCfb2dt7xeX/ABN8tTVhzR5QpTlSlzRMLyNV1qGK0nf7PpdsuxbOD7vzfxN/ertNPs7TSoWliiVPvf8AoNVFi8q5baiKskyqq/3fvVJHfIyL8/zbaUIcoTnKcuaRm+JLndNdy/3bZqxvCeoJBrekbpdn2uFkb/Zo8UT+bpWpOv3ltmX/AMdauJ0nUP8AiW+H7ve37hti05FnrmqW1uvhu5mluNLt7aNtrWLLsaeT+FV/h+b73/Amrl9Ps7LRdB0+y/sqXS9SuZG2xLJ5qsrN8rMq/db5v7u2u2t9T/s/xDbatbPsWRV+bb80X+0v+0u6qXxMvvEGuar9kiuHt9LjggaBWkV/Nb7srM23du+b+9Xn4qlL4onVheX4TM1zw5FPpVtKviXS4LtpG/1sjOs+35d25f8A0Fm+b5qydY8GfFWDRNP0zQ/9PjWRUWxXyLeWeTb5rN/tLt/vf7VVLfwBcaD48tNdvtV0jVtGku9seo3U67Ytv/LJov8AeXb8u7/x6qni7x1b6n4ka709pbKSG4WCRbFftUTSbf8Alkv8Nci5eblkdBU8HQeN/wC0J4T4YmjSynZrqWO43SwMu5f4F+7u/wCA1rSeKfBV5pl9pH9lLdXe5YNvnRxRWS/e83aytu/u7VWsXT7/AECxW9v18ZXeg38a7PLgibz7pZP4N8Tbl+7/AHf71WP+EVuJ/B9zr1n5V7pF3P8AY7u1gg+0Syt/CzKvzKzf3t3y1080TH3i9qv9kX2i2mn+CddggkZn3NcvIGV/4l8rd+6Rnb5WXdUg06XwQtj4l1G1ikgj/wBK/syPTluEuW3f3mb7rN/e+asDQfA2oxaFayR6JqP9oWtzLcf2OkUkLSfdVfmb5pPl/wB2vadJ8Qanofhy0/tXwRb6NdyRtOsX2ZWb5f8Aa+b/AGaKcY1PdiFWryHmPhrxWfFevfatat7+z0/c37+3VIF+dvur5vy/e/8AHa2v+Fcr4vudUt/DifaG27Zr6VlVYoP4Vb5tv975qwptFf4gzazaXlxdJr9pds1payz/AHlVv9b83y1zc2panpHjKKwttQvJ5IY/3lnZr80m5vu/N8vystTGUZe6X73LzHX2OuRarDqHhy58QXV5LOytGvmRuyzxLtbyl8rcqtt/hatS61O01O/0/wD0t7q7WPde7VWLaqr8v3fvf98rWT4q8J6nFo9p4rXT4vDnk/NJZ+WqXk7fLt+793+L/drH8P3+gQXF3f6ta3H22T/XNZttadvmfczN97/0KsuUstz/APCaaRfwaYbWx1HS2uvtUCpts/nl27ZWb5t3y/3q6bVvENxBpsWn69p9vb332lt0Ese5oI9vy/d2+b/stU/wj8MaE9hJcarDdWDX8cd55U7fLKzL/rV/2f8A4qqPijwTcanNc+IJdTurjRJJFtbZpYZIl3KrL/F83zfLtbbtoFH+UdD4mvZfD2l/2H9ln0uSH7Lc+RafZ2nnZv8AWsy/d/8AHqoLd3uuarq2oReCPN/s298j/iXfegji3fvW+Vvvf3qxrFtQ8PeD7mW21WK4ay2t5V1Jvl83cu5YovvMvzN81TaHrWp22pWmpy3t5cRtDJdeQto0v+6v3vm3f7tEuUIl7UtMstT8K6fqa6Va2EEki/abOKfbqc7Lu2tEzfei/i+7/C3y1evPDWn/ANqtcQXeozz6xpcbWkF1Gu6dd21f3q7V/h/2W+X/AIFVbxRrUS+RdwWMv9rNHH50DK0Uqru/dN5W35fm+7tqTRdQltv7P1PxHb/b7a58yKSLz/K+07fvee23727b8v8As0FnM3Gs2Wn6JLp+n2/2XUrC7kiudRvmaKVllb/VM1Xr97CSLSoLDSZrS8Ef7pGbz1f5fm+7/wACb/gVZ63MUFtrfiCW0tfLud3l2vns6qv+1uX+8v3vlau58PeIfAeofCLTNP1ez0uHUZHZQYB527a7f8tNy/wrRKMpfCEOX7RYj0DUNV+GMF7qGhaS+oRyLLaWOkx+bcsrN92Vt21W+9/e2/8Ajtcr4w0XV/DGpabb3WoaTqMs0zLbWN00kEtou9vlaX+LbuZdzba4j+2dY0Hwe2kxaneRfaZJPlT7zM391Vb5V/iqfVNX1DxBLDFrytFcwr5VvefZvlg2/wCzu3fN92u6VD2UuX7Ry0qntIylze6dTq+gaLb6xozTeL7Czla2zdqi/Lu+6vlN83zbvl/9lrqNLl8Gaf8AD3WbSz8S39/BbM0s1rdSLErbvvKvyru3f3v9mvMLXV9K03R3txKtrqEUSxeesX73c33tvzf7Pzf7Nbvi7wzpkFnpdx/bGl3U88bJJPZ7n+9827bu+X+7WEp/3TXl5olnQfC+lWviq01X+zLjW9LjVbqe1nkgWKL+6zNu2/3fl/2ateNvFA8WXd4/hrw1pelm22wXHmt93b91lWJdu3+HdurmLe80eeafR7OKwli07dBBdL/o8W1vlWVlb7zfxfxV02g+KLfSvDdp4EsUs7KK7j8q/wBRWPyopflZmZV/4Dt3NtqY+8T/AITJ8J22py6VqD6HLE0Fs3nz+VGs/wA23ayszfNt+821axl1C78VX9zZWyW/+hTfaI90bLF/qtu390v+d1EeoW9nZ3NlpVle2Elz95om2rt/u7f7rV0ng9tC03TVWdr9/tccj2ErKqwNPEv+q+7t/wD2Wol7MP3n2TA0zXPFWma7e3dla2cVtL8s99GFaT7vzf8As3y1qaHF4Xns9Ziiu5dL1TyVng/0dniu2/iibcv3qz76fWLOzktLaHS7iC/ud0l1Ftlgln/usv8A6F/urWhdW1xP4Ja9vLh7Pa3lebawM8Tf7K/N95laj3Ze7Ii3s/eiY+laNNqOtDS4tYaB7iX7M32ZtqMzfxfL93+Hc3y1v2i67pp1vRbnUNNaysrJrVrxrBpd25lXzYpfl+b/AGvl21jeEYLvQfEMeq21pBdWVtctFcxSr8zLt+b9195m/wBqtm98T27TaorWF/JHf/6yJp2SLa38Kru/u1rChzHLjMZTpR974h2h2d1Y67JLZ6lZ3lkyr5a/6pom/wB37tdB4X07w1p95/auvaFeRahcXEm39380W35vNlZf4f8AeauFOpzSX0Lx2kFtH/0yratfGv2J/wB+rf7W2umGDo83MfLPOsbS+zzHTWPiH+w9Hu9b8B+F7+e2gka6udRupP3Uny7Vba3zf3a5Ut491fU9U8QbpbfVPl/0y28yCefdt/er/wCO/wAX+zXTWnjnSposW2yDd975dtaqa5HdpxKpX+H5q1oZdCMuaUjnxnGGJUeSOHOevovEslzd6l5V/okkixxQOmo/dX+Lcq/61m/vVSs9Ki0+GVJdQupfPVkuV8z/AF+5t3+9TfHvixLE22nh9jN+9b5v8/7VcN/wkt3JtaJJWVvu/L/DXk5jH2VTlpH2nDGKqYvCe2xcfiPTbXULexT/AIlVpBZyL/zwXZXX2+tRa5pS3DbFZf8AWLu3turxH/ipb62glgspUinXzVZmX5lqz4fi1vT3udTn1CWKJpFtZoNv8TfdaowdWVOp7x62MpUZR5aR1GvXL3OsfM/yxt8y15Zr1y8ulXvz/wDH3c13V4rtcy6ZYul/OzeUv2Vt+7/d/vVy95Zpp+pfZ760/wBL+VFWVW3RM33vl2/+PV6lWf8AKeTFcp6HpMvleQn+zHWzbtuSJP8AaWub0uX/AEzZ/tLWlHebZo/95a1hIxkaEdztRU3/APLH/wBmq395GRZX/wBXXN+ftRX3/wDLPZ/49WhZ3KeS3z/wrV8wzpptjWzIr/N5jVjQt5CL/urT1vP3zPv/AOWjVBdXKeT/AMBqAMvVm+02d3bxJulkgZFX+822vM9InZvC1tFI+xoG2t/st92vQfPSK5l+Tft3fe/4DVnXPBOha5oOn6h4Q1OL+0pPnmtbr/R/NVv/AB3cv+9WEp8prE6rwzfW994biSeVPNVd9cXfeOItQ1iR4Jd9tE2yBW/urWLY6mljYXNlfW+pJG0ckUjWckaeX/s7mb/Zrj9Bi0W+vFsv7VurNmb9y7L8rL/9jXLiZyqx5Yndg+WnLmkext4vh1fw23h/U3+0aa21/ssrb1Xb93b/AHajh8F+F7rRIPssr2dysnyy+Zv+7/erzDUNI1Wxffp+pJfx/N86xtFtrq/AOoXEmiSTXp3Mtwyr827+FaMsh+85ap4/F2KqU8HGrhpcsoyOtk8J6t/bFtcWf9jX7bdjXWo2yysu5VVm2sv8NZ9x4O13wv4kj/4Q7xLeov21ZW1Fm2rGvlN/D95vvfd+7Wm2uqnzb2WsbW/iClpb/Z1dJWr254bDx94+EwvEebzly8qkaGkxXfhs3txr3iX+3JZZ2l3S+Z5rfL97czbl/wB2oNZ+Imt3UKOthc3Cw/dlkdvl3f7Vef3WuXGo3bSFtn+z/dpVvblPnW9uom/vL92uD2dOnKUqcT14YnGVNcTU/wC3TqLrw8ksMUuoXsWnLfyMjKv7+XavzfMrbV/iX7zVFfaVLbJFqGi2lxawTqsUcs9hs+0tu+9ui3bf++qwpr2+1e2itP7QWWTa23f8kq/7rf8AAf8Ax2ug8N6fe22g6bqf/CZzpAzfvNOib96y/N91vu7v71cdWkfV4LGe0p/Cal1d6dp0lla+J9LXWbgqym7aPz5LZW+8v+z/APY07wbpnhe8+Isj6Do9rb21h/rGvlb7NPu+7/vfe+7UHiC+0SKH+0Lm9un8uHZBEy+a27a38VVrPwT4cvPAEGq6nqt5qmpK3/HrFC25fm/ib5d3+9WEIyO+XKdF4mufBVjeR6Zq92z2K3cjLa6dcyKtpJ/DEqqq/Ky/w/7NY39oanczXvh/w5cXS2Ks0X2WVm8+Bt33WVm+arPh/wAJ6VriNe2en6dYK0zbomj+9IrbfN+bcq//AGVO1rRfFctg1lbeIPsqxrvnvFbbLtX/AGlrX4iYxjE4O+8Wa3pVhFp7eI7yeS2Wfc7zLKrN/FEu7+H/AOJp2l6hZazpen/bpvsc8kPlN83yyr/tf3f+A7a2YdBvdP8ABkWu6Um5tzXG28gXzYpNv8LfN95q6uTV/EWq3lhol5bwXll5X/Ezintl27Wi3Ky/3G3fw1HulmU3jjwfY6bPp+ofDKKwtGVd0+jzsizqv/LVVbbuX/vqjWJXvvteleGpXi0Ke2ka2ilu/K/h3N5q/Ltb73zfN91azvEPivVWvtP8PX/hjQIzoVz9mWyuo/NjaFk2qvzL93btb5awp9ZuNe1ueLR/7L04Q221raxVkVZv7y7lVdtOUJcvuijIsR+IdavPA0HhTQ9Ygtfsjef9hlnbzdzf6xV/ytQabBMt/Paajo+lXUicC6u4kgRk+9zlsbtz/wANdH8O7XV9QS68TWlzpmoX+/yLiGGVi/8A3y3y/wDj1Ylx4ssv7Vml1HQbYLC3lNaw2qhEb+8o2/LUc0vhL5YnMLquqyXMHkQrA1p8jLeLuWVf4dy/3v71bepJ/aHhu4uf7Q3su37Rsj+x7W2/wp/Eq7v4a5261C3XQrH+z7TUWaNd1z5/zf8AfNW7rxRLPo8FpKi/ZIPuwfc+9/n+KtZzlKXMZckYR5SXQLtUuv7OtLKLUra4hX/WrtaJv7zO23+9Vu71KCDQUtzbebJa7luN6x+azf3fl+7/APE/drAvNQi/tRZvNlnadl862nkV9v8AD/DXVaS39vaqrz67FYWkatttYFVG/wB1f+A0hGFpttb6hoP2hdM+2zq22O1l8x5d397b/Ev/AAKtCyvLW38M3Omx6U3nr83nxTf6qRm3NFt/u1bvovIv5dP0+9v/ALJafNulVoliZv7v8Pzf7v8ADRrEWg6Z4e0u3tvNlnn/AOPtpVbaq/3t23a1BcTE+zXE+lQJPp8s/nwM8DRT7PN+b+L5vu11NnrlxqHg3+xNViR7bT1WWNdq7oF/4D8tYNxof2N2uImidbtm8hor1k2r/wDE/wAVS3mlOt/HKj6XErQx+f8AM23avy7dv3afLTl8RXNL7JWs/Ecun22oaZp+lWEX2mRUh81f3rbf4f8AgXy1pWM/iDStBW41B9yyTLLHZtB8sTL/AN8/N/wKpNQnSC5gfT4rVLGfckm1fKZf91l/9Cql9psovNuNMvbq3tpI2ePdN5vlN8qtu3fe+7USkTEveH9Q1pbq5g0rS7mfS5I926L/AJZxL975mbctQXF1p95cKkFk0X+y0n/oVY2nakt3ayRO9zbyPF5U0++RVkX/AGU+7Wp/omjWkcWpW0jWkrM63Pl7LlvlX5tv+1XRSq8p5eOwH1n3ub4RtxttIf3vlRf3dtZv2nz93kQvK38W35ttPi1DSG0F5r+xK3Ym+WOSTczf7O3/AHa2NJ0691DTZbvTIm0uWT5JmnVv3q/3VXd8tVUrxicdLKZfaObgh1C5+0y2sTP9mj82bb8vlr/eq8t1qdtafaPN2rGu5m3fdWpNSXTLbUoEnfY27e14tyv3f7u1vlb/AL6q/DZ6PBqVj5GsSy/el82eD91Fu/vbfvVPt5HdLKaMviK6XMUmoWWpaxtuoGjWVWi/iX/gS/LXSXPifSk06W0S4nutLWSN4Wnj3KrM23yl/wDZq4fVryfUPFn2J2iW03N5csS7mb5v8/LTI4NY0iG2S0vZYLaeZvMgbb8v+1/drKrzVPiO3DUo4aPLE9G0vUPEstt/ZljosV/p7bnjb7ssTbtzf3a5/UFu7nW7vTNPt/ssHmeay3Vz5Usrbf7tQaLZ+KLG8luNI1WKVY/9Ib5m27m/8d/irOmutX03Um11dQGp3c0itKsq7WX+Hb/wGo9lE19qO2/2Vc/aNI+2WTRyM/lLO25v4fvL/DWtZ6hqE81zqDaFFawXP7r96rXEq/8AbVqljnitnnvfEdo1xHO29ltf9Uv/AHz826mzanaXkP2jSL26uo2ZkkaXany/eWqD2hpafOn2nfv3/wD7VXVnT90/+0v/AKDXO28+2ara3P8Aq/8AeWvSOCRe+0/uV/3f/Zqtxy7bZv8AdWsBbn5P+2f/ALNVuG5/9lqg5ToFufkb/tpTJp/PtmRf4axFvP333/71Twz/AOkslSBB5+7VWT7+77y7v9qr19Y/bLxdM8OaxB9rg+f7G+7zYl+9838P8X8Xy1zN5K/29k/ib/7Kufvry33s/wBtuortVaKRYG2ysv8Adb+KuWub0vdO4XV7jU/Cq+H18OL/AGgrMjSwMsu75fvbWZay7zT5bHSrTVYNPinbb5W9oPsrRf7O1v8A4qsDQdLt7q0aSx1VLee03eTBPubzf/iadDP4wbz7tN0q+Z8qtIrKu2sPe+ybc0ftHeWuipBpTXer3sumy7t7WbRskssH+y33d3+z/s1mXj2Wh3si2d75ttOqyrL5H2f/AL6Ws7/hIdY1WzbTNc33VtGy7V89oJdrfxf7X+7VLVLbStTRbeC9aKVpNqr529mrelV9mcGPwf1uPL9knv8AU7ueT7P+/wBrMu7Z95d1N8YadoukQ2St4g+0SSfdg8lkb/eZqraxY3GlTR6ZeXCJGqrtl/ilXav/ANjWWsOlardyz/am+X5I4Nvyx/7StUyq83xGeFy2lhvdiXY7a4ivJEtk81VVW81m+Vd3+1U66jp+xm+0Sq0PyyeV83zbqzJIni1iO0e7eeJl2SStPt2//ZVq6t4ct9if8I7rcF0jf8srn5fm/wB5q15uWPukSy6nKXvHQ2cuoX3htrvSJbhZY22fND+6iX/aauy0vRvCtp9kWOyuLu5aDzbm/s5Y4IIGb+JVfb8zfN92vPPDXiPxfoNtJ9r8p22q8cXmLuZW+X/dqDX/ABBrsepxpaWTtJIyuy/Ltb/4n+KuWUpcx6tChTpR5YnoeoNdz6VIjRWsWmyXKrbSyxrLLP8A89d0Xzf726sLUPFj/Y1SJPtUC3PlfavLZfmVvl+993dXL6kuu/2cl29289zHJ59pbbtvlf8AxVSSeM5bOFtJ1eL9xIu7csHy/N/vf+hUR5fsl1fej7xqWPiWyl8SRxQXt7E07bZPIuWRom+993/eqG+sX+03t1B4w1SX7Su9oGmX733l/wBmq2l+IPCUCT/bJfKZm+ZvLZmZv+A/erNv9R0XXXg0y1uJ7O2t5vvfNuk/3l3VpKRlCJ2vg/WvGdj4e1K4isrq/tI/n3Txqixf3tvzfN/9jUvhvxRqesTf6DqEUV3O3m7YoGll2/3vusq1z+nyyy6bLpVtrf8AZtosn7yJmZPPX+7975afJrVv4ev4P7KedoII9it97yvm+6zVhKJv7SPKdWvil7HxVBoXxY8O2F7BI2y01iW2Vl/2dzfd/wC+avyaL4EudeW9sUgtVk+RltZFTzW/3vvVx0fi+XxNeNb65rcSWiyb44ooF+VqoXJ13S7yS306/bW9Pb96t1JPGqr/ALNdkZR5TmlGUjU1rVdS+H3xN8/wqk95ol3GqtZ7flX725F/2v4v+BVsWnxD0DxPJc2S6KhkTaVhe080/wDAtv8AwKvObzxKmtaksW9rWBVb5bVvl3VFqegW1haW91o2oxNcOP3sjM0WP/Haw5pcvvGhVVbG2vJ3017i6Zl2RrPNt3fL81RLbQ7Fhu4oomjj82ZYvmb/AHf++attbW9tZz3tnaq8/mfdf5W/2v8AeqBr60vryKW8dUu2be0Vru3M3/AagCeTT/7P037Wr28TSbZYIrpd6sv95f7tak11cXltbXssVvFA3z20UVsu7/arl9VubcyebBbxWq7WTym3L8v+1/FWp4bvHufIi+zyq0S7oG8/yomVfl/76q+UCGT+09K0qfU0uneBptrKzfeZv9mmjxLqVy8Cao7uyr/D83yt92s68s/+JldxSpceUskjrvb+Kn2tin2Oe4gWJv8AVsyyx7Gi+b/e/wBmjlHzFu4vrjU9bay3v5W3Zu+8q1rWPiXUNF+06PLaN8v/AEzWWVv4v93bT1u9PtPD0SahqFx56yeeyW8m3/gLNVHT9S+13Ti2l3Sr8kbTsu5Vb+Jf8/xUcojU0HQ7vXJl8QJL9gg/ilZd7S/3tq1i3VjcNrCyql09o0zJBBtWL5fu/wAS7f71F1LFBf7FuNm5WaSLzmfatSROrWEa6lMs9o0jM0DR/Nu+XbtpgVLxr1ZoNH+0NuWTZJ837hf9nd/7NW3NKi+ErZJ9Pt5Wjb5pYGZvl/utWJdXf9o65GbTTUSNdrLI/wB35f73/wATVm38VXH27+zb6WDyt331j2/LSlEkgsbKK/vpP7N/cbt25v7zKv8AD/drXt77W7a//snUNbl8j/VSRNt/8eaotQ099QsJXtkSKJvnkll3RKv/AMVWBFPcaddQtLE0qqu5XaNlZv8Ae3VPKXzGpqHhW9lhklV0+WT727bWe1ze6bbT2lynn7fkVV+9FWpeeOnS2X7DaLL/AHlf51qhYz2+oapLq+qbYN3zMv8ACtEeYso2c+tfbY7domSRf4ZY9tdPrX9m6rfeRqdxcNeqsflrayKqbdv3tu2ufkvom1Vfsd7K8X8KtHsVVovraFrZrhb11nbamxf4lqzM7Sxi1DRfDC3emTW91bSMu5ZW/e7d3zN/tf8AxK1m6pP9h8TR/bLiW6sG2u1ta/xSf7P91ayNN0+4utNtne+llso4/miik8po/wDd/vU2a2tLG/ZIriWLzPlX7V95f9qgDdj8Vaf5NyljoTz+W3/LX5mXdUWl327RP3VlbpBLu/eq23a3+ytULHT0XV49QguEtbmNtn7pf3Uny1PN9nW/nuLy0dLndsj2yfulb+JlX/dpcoF/z9rrU8c7r5X+8tZLT/vtn92rKy/d/wB6u05pFhp/3P8A2z/9mq5a3Pyf8CWufkn+T/gNT29z/t/8tF/9moK5TWkn8qbe3+1VlrnyrxZf9lqy7qX5N+/+Fqhkn3bv9n/7GlzEFi6l/wCJlvqpHqqWzyw3iL9r+Vm+X5W3U6+3y+U8X8Xy1SvIrJoY9PvPK8hW/c+RJ8y/73+zWVU1hErXkUVy66hbebp08km1WZW+am/addtrDzZbeVVbdtngb71Z95O8UM9pc3D+b8vlyr8q1qWNs8FhBZf2hA6s29V3f6usOY1J4bOXxAls9trqSyxrukglX5tv+7Wbqcq6ZebN/m3MbL5Lfwr/ALX97dVmHZpXn+RrDqyyMyxRf/FVUvPKvkgvby4/fySMjNEvzMv/AMVVk8p0Gn3r+IobIOiy3NtC0Ukk/wB1v7v+98u2ti0bw1YeHJp9U01k1BVbbvjaVN395Vrzu8ttMiuW/sy4upVb7u7buq5p94lj+91WLUZZG3Oq+Yyq3+yy0By8xs6DeaLcaRd2l9oUF19pZpfPZdm1vu/L/drIjh0jTfFCtJLMLaKZX27tyll+b/O6p4Z7eeFr2D5G/wA/K1Uo9Qg1DUfIntEaJl2ful+b5v8AaqPeK909e8UeLNKufDflWd7FFP5e6CeLa3lV5hN4h8QNpbfYrizlT7zTxQ/N/wCPVoafotp9pbd8sDR/8esq/Nu/3qLyea+8PLpX21rW28/aqyrtZm/u7qnmjzDkVlleSV9dZ1/0f/VxSt5vls38K1Jca9LqFtbS3KKk+3/lqy/N/u1Hpun2WkWzPPv3SKyebtV1b/gNaGmz6PFD9i8QfY5Y1+WN549kv+61VKIc0TB1T7RPNFLB5TNtVpIom3bW/wBlVq1czy3ljEotLizvVXeZJFXa/wDvfxVfutP8MWV/A8DvF5v3vKl/h/h/3az7q8SC/tvPvWvYF/1fyq7bf73+zRyhzDdSZIt1v/aCSt5Hyzr/ABbtvy/5/u1WsdXfRoZ7SWV5VZv4vn3NWhHY6Z/YO62T/S5G+WeWNflX+FvlovorhftN21pZpArKsi7t3mt/eWmQZq3Onz6bJcNL+/VW3bI2/wCA7mrX0S5srvTo7e+u28vb8sEq/ulb/ab71ZCrcRawt00Sss/ybl/9mWp9Sube8vI/IuH+Vdv3drf/ALNLlCMpcxY3Sz3Msv2SzuFZtjeVGvzMv91fvL/vVNp26e6a0uri9tRt3qrRb1/76qrYz2S37fbrSK/X/nqnzK1Q3d8smqNNpN41jCy/ci+bbRzF8v2jPulW5WKYK8rMvzRo25d1WdJnezv/AL8UE/mfMsq79v8As066tLK0kWKPbErbdu/56qeRtvN8txL9m/ibbs+WrINr7NcfaZbjUIrW/Wf5tz7m21Ujne2to/s037hW2rPu27f9nbVCTVUkTyXlllX+8rVEsssUyxNcI8bf8st33aANmO50+PUpd17LdNI27yoqz9StpYtSW4WJ4mafd93dtptvpv8Apn2hklii/u7q3Y4rL77OqMq/Kq1IGeup/wBnw+TZ2TyszfN5q/eap1sYovM1tpfK2r80SstZt9LL9j2y/wCi+ZJ/CvzMtNke3+x+VE7r/BIrfJuWqA2P7PtLm2ub1bdFaT51+bdWXDJNA8CX1pFE+3/Xy/L8tSzWd3baarrevt3bvK3b1b+7/vVMsru8V3PKrNH/AHo9n/jtADbqW0+2Nds7rJ5mxUiVk3Ltpt81ppT+bB5TXMnz/N8+2slfl1KNIPN3M33mq3/Z7xakyXNwj/xrQUWZNa1VryC7ZG89l3fvV+WqMk9xPNPLLqHzSfOy7flatDUIPPRf9I37fuq33ay57S3isJH2+fL/AOg1EZcxJbh+y2NhvjV5d33ldtq7qqTb7nbFFs3fxfLUCfOrI7tBtX+Hc3/jtRfcTd5u7+BW/hqwNm1torl18/YjWn3m/vfNUtxLZQar9oivdu5v9VFHWJu8rakV6r7v/Had5DwJv371/vbqAOiaX7dNJaLeyxKv73aqr81ZbT/voLieV5Y9v3t1QR2kU9z5z3qWv+1t3VMs8VsjW/nPLB/n+GpKJYdQe51VbuO9Xz1+6kq/LuqWb7Xd63Be3K2vyqqs0TVlSNFbOstnv3NVm3nuJ7xpfK2ru+ZttUH2TVWX/SW/3qtrL93/AHqyPN+epfP+SugxJ5padDLt/wC/lZ8ku6hZfnoA3Wl822/76qBZ9ry/7VVI591NaX56ANKaf/iWz/Ov3f4q5tbxLGfbBN5sv3fNT5t3/fVakkv+gS7X/hasTz4vOWVk2Sf3oF+9WMjSJpW+qpFC0Vzt2t97ctUoZLdolbfLvb/VrVmNtPZGeeZ0k2/wx1RtWuFf91sdd38LbKko2W1Cyls1/wCJZb+av3dvyVkRz3CpLb/ZG2/f/wB2pbp38lv3SQLu+Vl+dt3+9Ra3mqxIzwS+av3NtV8RJHHcvE/2jynRvublX71aUjRXiLcXNw/mxq22KWsSa7uGdvN3bv8AprW1ZvZXlsv2m3i8xflZovvUBEryRXdz9pbSJXlgj+dlX/P+9TrXU5Vh+ay33K/x1FNZxWqfvZWX/rk22izgTzPlifb/ANMm/hqQLjXnm3K3ESXUDRr8yqzOtQSahEtz/pySzs33W3VNHcut/Om/av3t392obyBbx2l86L5f4vL2/NUcsS5HVQ69p89hFZWaIrLH8u3+Guevtc1CdIrSXZKscnyyt8jNtrNtY9QsQ13FKu1m+b5aghluo7n7Rcur7f7zVZB0Fq/25Iri+t0lg+ZWVtv3qvrB4Ugf/VKny/N+8auXk1N2TZ9xf9mp9J1VLaH7FPbyvGrb1oALy20xdS26Zer5Tfwq1W7i2u5bBoVRP76/NWXfSxXNyz6fE0UTNVi1sdQb7t3Fu/iVmoKCae4iSPzU8rb93bJ8u6lW7iluYri5l82Vm+bc3/ju6oJt1m7RT2UTSfw/3adp9z9jdnn+797btoJLc2qpFcyf2ZcSpaKvyxS7ahhaIpi7t/mf5qiWeK5eW4iiiRmbftare2bV7PymaI+W3+sj+WolHmKM2aW9nuf9Jl2Mq/NuqNo9sMbtKzbf4GarNxeRToqN97+Jv7tRXCxecvkIn+9VgRtBufej/e/u1bt4EWFrfenzfe2/eqi0rxfuot7VLHssfn2fN/eoJLMlz/B5Uqr/AA7mqSS+i2bPkVl+8y1nSM882ze0q/wq1WV8r+JF8z+LdQBbZop/nZGfav8AFTpJbi8mX7HFs2rsrN+3StutPurUck9xEmyKZ6ANa8W4gtokgeLbH/D/ALX96qLXLs+xvm+X5qoG5uN/7zfup3nosPy76AJfNmtnX7NtWnN9rb52f738VRbvk3sm2pY23Qrbs77f71VEAjW4aZX83d5dOs7n7Nct5sW5ZP738NSR23lWzSqny/3qjklRodm+pA0ttv8AM6xb/M+8392o2VG3OqRI397bWb9sli27H3VN9u2p8yNub+7QBHdLLPNvii+Vf4qFWJLdXneVmZf4f4adDPt/eq7/ADfw1HdK6uzxfdb+GjlAbmL5v3Ctu+6zVt6B4a1PxHc/ZNH0TVNWu1VpfsunWzTy7f7+1V3bfmWufkaVkj3J92vrL/gnq279qrUPvf8AIt3f/o+2oA+fdV+H/j3QbZtTvPAXijTbSD5pLy80meKNf9pmZflqloGi+KvE101loWlavrMir5r2unWkl023+8yqtfrf4T8VfFHVP2gvHPhrxP4Wht/AtiqnStYePZ53ypuRst833m+b/Zr5p/ZWj8OQf8FA/inb+EWi/sCKK4+xfZv9Uq+ev3f9n71UB8if8Ky+KG//AJJp41/8Edz/APE1W0zwR4412xa60PwV4j1S2WVrdp7HTJ50WRfvLvVfvf7Nff3xK/aE/aK8M/E/xD4f8MfBL+2NFsrhorbU/In/AH0f97+7T/2SNd1i3/Yg8UeJ9J0tLzVotR1fULayw22ecRh1j/vfM2Fq+YjlPz61TwJ4+0bTZdS1fwJ4o06yj/1lzeaTPbxR/wC8zLtWs/QdE8Q+I9XXS/D+ialq16/zfZrG2a4k2/3tq/w/7VfWvxX+OP7RXxB+Ft14G8T/AAW/sGw1+eDTlvWinTEksi+Wvzf3mxXuPivXPBP7E/7OWmWXhzQYNT12/kWDezeU2oXKruknnf721f8ABeKRZ+e3iTwB8QPBKLL4v8Ga5okEjbVnvLRliZv7u77tZuk6H4g8R3jWnh7w/q+s3McfmtBp1pLdMq/3mVV+7X6B/AX9qyz/AGg/FeofDLx/4J0u1kvbWR4kU/aLa5RfvRSLJ/vVV+AvwttPhD/wUG8ceGNMeRtJn8N/btP87ny4ZLmH91u/i2tuX/vmnzAfCl94E8faVo0+oax4E8VWGnxLunurnSLmKKL/AHmZdq1iWWgalrGopp3h3Sr3WdRudzRwafbtPIyr97aq/NX6i/D74z+PfE/7YvjT4Xat4Wik8L6SJvs+rxW7Ls2+XtR2+627c1eJ+CvDfhvwp/wV/u9G8M2sVrZC0uJ2tYQFjgkks97Kqj7q87tv+1UAfGjfCr4tN934YeMv/BLc/wDxFcxPBqGm6jNZXlrLBcQyNFNBKmxo2X7ysv8AC3FfqL8Zfjp8e/BPxcu/DvgL4QN4n0aGGF479YJzudl3Mvy1+aHjjWtU1/4l+Ide1i0FnqWo6nc3l1Bt/wBTLJKzMv8AwFvloAy/Nefan8S/eWiaLZDJ5XmqytUELbnaJn+b+81OaW4idUb+H5F+aiQD1vpYk8qVIpV/2q0Le+/cxRLEiqtYjtGW3sx3VIs/yfuvlagIlvVpYmuV+d321La3m2sht7JvanR/c+V6ko07iX596/dqJp3aFkV/vVWjbcjfP/wGoo5ZYpqCS5DfXawtb/3qnWJ3Tyotqq33t1VdsrfvYvvLTd0svz79u771AEsip5OzyvmX/wAepm7b/wAskomXdt3S/dqu3+w9BRdX967P8+3bs21bt50aFot+7+7WPGz713fdWrLSpL/Bt/3aCS35rxTSxb9275/m/hqn96bf/F/epskvzrvVm+X5mWr32m0+zfNFQBWk+W2X5FaXd/dqzp+o/Zd2IdqtWfHJE1z/ABp/wKnSbJJ2VpWqogPjVG+efY7U5WTfsXalVmWhvlTfQBIzeVMyKiuzfxUfLs2yfNVbduo/4HQBcjudv3aZNK/2nf8AxVAtPmZN60AO+/N5u3c1EjbXX/ap0cu1PlqOZ9yb6AHbnnm2NUkaQqjb0qGOXa6vspsku599AE21Jd3z/LR5qKmz79Vlanfd+f8Ah/u0APkuZZfkZ9q/3VojVF+emNTd1AE7Mipu2USMjfItN+RkqL7j0ASxq+zZV2TY1hVLe9O3S7NjfdoAI5X2V9X/APBPVt37WOof9i1c/wDo+2r5QjW3b+Nq774R/F3xN8EPHkvi/wAH2+nT381lJYsmoRtLF5bOrt91l+b92tAH6O2PxY+L+o/tuar8LLn4freeAFYxf2wbKRFjj+zb9zSt8kn7z5NtUPBHgPwl8Pv+CjOv2XhDT7bTLK/8HR6hPY2iLHDDO10yNtRfuqViRtv+1Xy9c/8ABQX45PF5aWHgyIt8vmRWE7Mv/fUteZ+Cv2lfiX4I+K+sfEpL2y13xBq1r9kup9ZhMqsm5T8qoybfu/dX5aAPtD4m/Gz9qTQ/iX4i0Lwj8G/7X8P207QWd99klbz4/wC/96oP2SdX1PwZ/wAE9fFWuwwL9v0WfV7xYpvu+ZDAG2t/wJa8Ab/gob8cpImQ6P4L+Zf+fKf/AOP1wHhn9qL4g+FPg9r/AMNtM07QJNJ15r1rt57aVp1+1rtk2t5u3/d+WgDs/FH7b3j/AMcW+j6f4i8P6JFYWWs2WrN9lV97fZp1lC/M3+zX0v8Atf8Awt1j4+/Bfwp41+GQXXZtNaW6ggtpPmubS5Rd3l/3m/dRfL/vV+X/APHXufwh/ak+KfwZsG0fw7f22o6E5z/ZWqo0kcLfxGJg25OP+A/7NAHuv7G/7OPxL8N/HZfHXjbwxe6Bp+l28iQpfDbJcTSfKu1f7q/xV7p4C8eaV44/4KS+NrfRLmK5ttF8JrpbTxfMrzLdRtJ/vbWbZ/wGvkrx7+3X8YvGvh6bRNIOmeFredds1xpqM1yV/uLK/wBz/gK7v9qvLPg78b/FvwR8Zah4l8J2em3N3qFn9jkGpxtKuzzVfd8rL825KAP1M0T4k2vxB1H4g/D/AML6la6F4y8P3E1mWZFl27v9Rc7P4l+b5v7rV8Ufs16F418O/wDBSldJ+In2seJVTUZb6ad95uWaFv3qv/GjfeWvDLT46+PdM/aIvPjFpVxZ2PiG8uXmnjiX/R5Fb70bLu+ZPlH8Vd/qf7YvxE1L4l6L8Qrjw34MTxHo8MsEN5FZToZYpU2NHL+9+Zfm3LQB9hfGT4vftI+Evi7d6F8OPhN/wkegRRxNHfm2kbezL8y7t2K/NDxfLqc/xD1271uzez1afUZ5L22f/lhM0rNIv/AWr6R/4eH/ABz/AOgN4I/8Ap//AI/XzN4p8RXnizxzrPifUEiS71a9nv7hYF2xrJK7M23/AGdzUAZLbGm+aht7VFJ/s09ZaAEb/cSo9vz1Kzf3aSPZ/HQArNu+8/8A47R5Tr86utSSfKm9H+WoGagCRelL959lCslMkb5/l+SgB8crxbvnojnfzv73zVB/v0Mv92gCzdS+a/zVAr7aerf3qY3zfdoAfu3fJSr0qNfv0Sf7NSBZhb51p00qMnzVUVnp33qoCdWi8nfsqPzNvzKi1Eu7fs3/AC1L8lSBE1N3f3qQknqSaQk5IyfWrTTdx3HbqPn2fdpP4TU1v/rF9zj8MVNxDKF/2qMn5xn7vT25pEZmdVLEgdiaG7ASN8qVE336Ucxc800EluST9ad12AfR/sU5lXLcDrTOy+55ptpAJQtSZJTcTk8cmo26AUuZbWJuOajdSMSCwBwM0v8Ayw3d89aE7bBcbupytUa/fpMnGMnFBRa83+CmM3yU7pbuRx8inj13VEhJeNSSVz0PTrTsgeou6hfmenD/AFb+x49qYOcA1LlcvlHs1Rs1OUliFYkj0P0pZCQ+ASAOw+lF/InUjx70bTRk8805uJ2UcDd0qrEu6GbWowfWnN/rCO1IPvCkVYTB9aMH1pw5mAPIz0p8/wAsgC8DHagRFUm371R7mI5Y8+9WGA8wcD/Iour2sBCtNqZOXYHoAeKUk4Tk9v61PMuwuZjFprUFmJALHHHenyM21fmPIGefYVV12HdjKcrU4/6+QdgTgU1iQWwejce3WlzeRVgbZRTNzdcnNOJO1zk9ad12IuxaNv8AepR/qM98kZ/CowzDoSPxouFh+2m7amk+WEMODkciiYlVh2nGVBOO9JSv0C7IWp1CEmXBJIPUevFIGYrgk9RRoO7FZaKVuJSo4G3OB/u0qgGRQeh20aBdjW/uUU4E+enJ42kfpRH80MjNycHk/SqjYLsbuptKeZSp6AnA9KUkhlIJBwefxNToB//Z" alt="Before cleanup, a dry channel packed with waste" style="clip-path:inset(0 48% 0 0)">
+        <span class="compare-tag before">BEFORE</span>
+        <span class="compare-tag after">AFTER</span>
+        <div class="compare-line" id="compareLine"></div>
+        <div class="compare-knob" id="compareKnob" aria-hidden="true">↔</div>
+      </div>
+      <p class="compare-hint">DRAG THE LINE — AJNAR BEFORE LEFT / AFTER RIGHT</p>
+      <div class="stat">
+        Slider: Ajnar waste bed (left) / cleared channel (right).<br><br>
+        Bittu Tabahi — Biaora, Madhya Pradesh. Started 26 Jan 2026, ~3–6pm, own bags, ~₹30,000.<br><br>
+        After the videos: municipal machines, Anand Mahindra, CM meeting, Ocean Cleanup invite from Boyan Slat.
+      </div>
+    </div>
+  </article>
+  <div class="news-tools reveal">
+    <input id="newsSearch" placeholder="Filter reports… Mumbai, monsoon, sewage, India">
+    <div class="chart-controls" id="newsChips">
+      <button class="chip active" data-topic="all" type="button">ALL</button>
+      <button class="chip" data-topic="mumbai" type="button">MUMBAI</button>
+      <button class="chip" data-topic="india" type="button">INDIA</button>
+      <button class="chip" data-topic="science" type="button">SCIENCE</button>
+      <button class="chip" data-topic="action" type="button">ACTION</button>
+    </div>
+  </div>
+  <div class="newsgrid reveal" id="newsGrid"></div>
+  <div class="source reveal">Summaries are written for COAST//TRACE. Follow the source link for the publisher’s full report. Dates and figures can be updated by the original outlet after this briefing was compiled.</div>
+</div>
+</section>
+<section class="section" id="solutions">
+<div class="wrap">
+  <div class="section-head reveal">
+    <div><div class="eyebrow">06 / SOLUTIONS</div><h2>STOP IT.<br>THEN CLEAN IT.</h2></div>
+    <p>Prevention keeps waste out of drains, rivers and the sea. Purification is what a city plant (or a careful home method) does after water is already dirty. Both matter. This is a school briefing, not a lab manual.</p>
+  </div>
+
+  <div class="panel-title reveal" style="margin-bottom:14px"><h3>How to prevent water pollution</h3><span>Land → drain → river → sea</span></div>
+  <div class="fixgrid reveal">
+    <article class="fixcard"><div class="num">01 / COLLECT</div><h3>Bin it before the rain.</h3><p>Most ocean plastic starts as street waste. Regular collection, covered bins and no dumping in nallahs stops the monsoon from becoming a conveyor belt.</p></article>
+    <article class="fixcard"><div class="num">02 / BLOCK THE PATH</div><h3>Guard drains and rivers.</h3><p>Drain screens, trash booms and river barriers catch bottles and bags after they blow off the street — but before they reach the beach.</p></article>
+    <article class="fixcard"><div class="num">03 / CUT THE SOURCE</div><h3>Use less throwaway plastic.</h3><p>Refill bottles, carry a bag, refuse extra packaging. Cities also use bottle-return schemes and producer rules so less single-use waste is made.</p></article>
+    <article class="fixcard"><div class="num">04 / TREAT SEWAGE</div><h3>Don’t send dirty water raw.</h3><p>Toilets and sinks should reach a treatment plant. Untreated sewage raises bacteria and BOD in coastal water. Fixing leaks and plants protects swimmers and fish.</p></article>
+    <article class="fixcard"><div class="num">05 / KEEP CHEMICALS IN</div><h3>Paint, oil and cleaners stay off the street.</h3><p>Household chemicals poured into a drain become river and sea pollution. Take them to a proper collection point. Farms and factories need the same rule.</p></article>
+    <article class="fixcard"><div class="num">06 / WATCH THE WET MONTHS</div><h3>Monsoon is the danger window.</h3><p>Litter counts jump when streets flood. Extra sweeping before rain, and boom checks during rain, cut the spike this page keeps showing in Mumbai reports.</p></article>
+  </div>
+
+  <div class="panel-title reveal" style="margin:34px 0 14px"><h3>How dirty water is cleaned</h3><span>City plant + safe home steps</span></div>
+  <div class="diagram-wrap reveal" aria-label="Water purification diagram">
+    <svg viewBox="0 0 1100 420" role="img" aria-labelledby="diagTitle diagDesc">
+      <title id="diagTitle">Water purification path</title>
+      <desc id="diagDesc">Dirty water moves through screening, settling, filtering, disinfection, then a safe tap. A home path shows settle, cloth filter and boil.</desc>
+      <rect x="0" y="0" width="1100" height="420" fill="#efefec"/>
+      <text x="24" y="36" font-family="Syne, sans-serif" font-size="22" fill="#151515">CITY TREATMENT TRAIN</text>
+      <text x="24" y="58" font-family="Space Mono, monospace" font-size="11" fill="#656565">SCREEN → SETTLE → FILTER → DISINFECT → TAP</text>
+
+      <rect x="24" y="80" width="160" height="88" rx="8" fill="#163c58"/>
+      <text x="104" y="118" text-anchor="middle" font-family="Syne, sans-serif" font-size="16" fill="#fafaf7">1 SCREEN</text>
+      <text x="104" y="140" text-anchor="middle" font-family="Space Mono, monospace" font-size="10" fill="#d7d7d2">bars catch</text>
+      <text x="104" y="154" text-anchor="middle" font-family="Space Mono, monospace" font-size="10" fill="#d7d7d2">trash + grit</text>
+
+      <polygon points="196,124 214,114 214,134" fill="#1f4a53"/>
+      <rect x="226" y="80" width="160" height="88" rx="8" fill="#557b68"/>
+      <text x="306" y="118" text-anchor="middle" font-family="Syne, sans-serif" font-size="16" fill="#fafaf7">2 SETTLE</text>
+      <text x="306" y="140" text-anchor="middle" font-family="Space Mono, monospace" font-size="10" fill="#e8eee9">mud sinks</text>
+      <text x="306" y="154" text-anchor="middle" font-family="Space Mono, monospace" font-size="10" fill="#e8eee9">in a tank</text>
+
+      <polygon points="398,124 416,114 416,134" fill="#1f4a53"/>
+      <rect x="428" y="80" width="160" height="88" rx="8" fill="#1f4a53"/>
+      <text x="508" y="118" text-anchor="middle" font-family="Syne, sans-serif" font-size="16" fill="#fff">3 FILTER</text>
+      <text x="508" y="140" text-anchor="middle" font-family="Space Mono, monospace" font-size="10" fill="#fff">sand / carbon</text>
+      <text x="508" y="154" text-anchor="middle" font-family="Space Mono, monospace" font-size="10" fill="#fff">traps bits</text>
+
+      <polygon points="600,124 618,114 618,134" fill="#163c58"/>
+      <rect x="630" y="80" width="160" height="88" rx="8" fill="#151515"/>
+      <text x="710" y="118" text-anchor="middle" font-family="Syne, sans-serif" font-size="16" fill="#fafaf7">4 DISINFECT</text>
+      <text x="710" y="140" text-anchor="middle" font-family="Space Mono, monospace" font-size="10" fill="#d7d7d2">plant treats</text>
+      <text x="710" y="154" text-anchor="middle" font-family="Space Mono, monospace" font-size="10" fill="#d7d7d2">germs safely</text>
+
+      <polygon points="802,124 820,114 820,134" fill="#1f4a53"/>
+      <rect x="832" y="80" width="244" height="88" rx="8" fill="#fafaf7" stroke="#151515"/>
+      <text x="954" y="118" text-anchor="middle" font-family="Syne, sans-serif" font-size="16" fill="#151515">5 SAFER TAP</text>
+      <text x="954" y="140" text-anchor="middle" font-family="Space Mono, monospace" font-size="10" fill="#656565">tested city water</text>
+      <text x="954" y="154" text-anchor="middle" font-family="Space Mono, monospace" font-size="10" fill="#656565">not raw river water</text>
+
+      <line x1="24" y1="198" x2="1076" y2="198" stroke="#b8b8b4"/>
+      <text x="24" y="228" font-family="Syne, sans-serif" font-size="22" fill="#151515">HOME PATH (IF OFFICIALS SAY THE TAP IS UNSAFE)</text>
+      <text x="24" y="250" font-family="Space Mono, monospace" font-size="11" fill="#656565">SETTLE → CLOTH FILTER → BOIL → COVER AND COOL</text>
+
+      <rect x="24" y="268" width="240" height="80" rx="8" fill="#fff" stroke="#b8b8b4"/>
+      <text x="144" y="300" text-anchor="middle" font-family="Syne, sans-serif" font-size="15" fill="#151515">A  LET IT SIT</text>
+      <text x="144" y="322" text-anchor="middle" font-family="Space Mono, monospace" font-size="10" fill="#656565">dirt drops to the bottom</text>
+
+      <polygon points="276,308 294,298 294,318" fill="#1f4a53"/>
+      <rect x="306" y="268" width="240" height="80" rx="8" fill="#fff" stroke="#b8b8b4"/>
+      <text x="426" y="300" text-anchor="middle" font-family="Syne, sans-serif" font-size="15" fill="#151515">B  CLEAN CLOTH</text>
+      <text x="426" y="322" text-anchor="middle" font-family="Space Mono, monospace" font-size="10" fill="#656565">pour through, leave sludge</text>
+
+      <polygon points="558,308 576,298 576,318" fill="#1f4a53"/>
+      <rect x="588" y="268" width="240" height="80" rx="8" fill="#fff" stroke="#b8b8b4"/>
+      <text x="708" y="300" text-anchor="middle" font-family="Syne, sans-serif" font-size="15" fill="#151515">C  BOIL</text>
+      <text x="708" y="322" text-anchor="middle" font-family="Space Mono, monospace" font-size="10" fill="#656565">rolling boil, then cool covered</text>
+
+      <polygon points="840,308 858,298 858,318" fill="#1f4a53"/>
+      <rect x="870" y="268" width="206" height="80" rx="8" fill="#163c58"/>
+      <text x="973" y="300" text-anchor="middle" font-family="Syne, sans-serif" font-size="15" fill="#fafaf7">D  STORE CLEAN</text>
+      <text x="973" y="322" text-anchor="middle" font-family="Space Mono, monospace" font-size="10" fill="#d7d7d2">clean covered vessel</text>
+
+      <text x="24" y="378" font-family="Space Mono, monospace" font-size="11" fill="#656565">Boiling helps with many germs. It does not remove every chemical or all plastic bits. Sea water is not made drinkable by boiling alone.</text>
+      <text x="24" y="398" font-family="Space Mono, monospace" font-size="11" fill="#656565">Follow local water-board advice. Do not mix household chemicals to “treat” water.</text>
+    </svg>
+  </div>
+  <div class="legend-row reveal">
+    <div><b>Screen</b>Bars and grit chambers pull out leaves, plastic and sand so pumps do not clog.</div>
+    <div><b>Settle + filter</b>Heavy mud sinks. Sand or carbon beds catch smaller bits still floating.</div>
+    <div><b>Disinfect</b>City plants use controlled treatment so germs cannot grow in the pipes. This is done by trained staff.</div>
+    <div><b>Home boil</b>If a notice says “boil water,” bring it to a rolling boil, then cool it covered. Use a clean pot.</div>
+  </div>
+  <div class="source reveal">This diagram is a teaching sketch. Real plants have more tanks and tests. Never drink untreated river, lake, drain or seawater. School experiments should use safe tap water and teacher supervision.</div>
+</div>
+</section>
+<section class="section" id="method">
+<div class="wrap">
+  <div class="section-head reveal">
+    <div><div class="eyebrow">07 / METHOD</div><h2>MAKE THE DATA<br>EASY TO TRUST.</h2></div>
+    <p>For a competition jury, clarity about the data is as important as the interface. This panel explains exactly what the main number means — and what it does not mean.</p>
+  </div>
+  <div class="method reveal">
+    <article>
+      <h3>What is measured?</h3>
+      <p>This 2026 dashboard shows each country’s share of global macroplastic emissions to the environment, using the latest complete published national inventory (Cottom et al. 2024, Our World in Data update January 2026). Earth Action’s 2026 Plastic Overshoot estimate puts mismanaged environmental leakage at about 72 million tonnes this year. Annual ocean input is still estimated at 1–2 million tonnes. These are models, not live beach sensors.</p>
+    </article>
+    <article>
+      <h3>How should it be used?</h3>
+      <p>Use the values to identify broad geographic signals and then investigate local waste systems, river basins, drainage, collection coverage and coastal conditions before designing an intervention.</p>
+    </article>
+  </div>
+  <div class="source reveal">
+    2026 briefing notes: Earth Action estimates about 227 million tonnes of packaging, textile and household plastic waste and about 72 million tonnes mismanaged into the environment in 2026. The country ranking still uses the latest complete scientific national inventory (Cottom et al. 2024 / OWID January 2026) because no full official 2026 country-by-country ocean table has been published. Ocean-input reviews still put sea leakage around 1–2 million tonnes a year.
+  </div>
+</div>
+</section>
+</main>
+<footer class="footer">
+<div class="wrap footerin">
+  <div><strong>COAST//TRACE</strong><p>Rising plastic pollution in coastal cities — a visual data prototype for InnovateX, Techfest, IIT Bombay.</p><p>Made by Arjun Patil</p></div>
+  <div style="text-align:right"><div class="eyebrow">BUILD / MEASURE / INTERVENE</div><p>Single-file HTML • Responsive • No framework • Interactive charts • Searchable global explorer</p></div>
+</div>
+</footer>
+
+<div class="assist-root" id="assistRoot">
+  <div class="assist-panel" role="dialog" aria-label="TRACE assistant">
+    <div class="assist-head">
+      <div class="mini" style="width:42px;height:42px;border-radius:12px;box-shadow:none">
+        <div class="mini-ring" style="inset:5px;padding:5px"><div class="mini-face"><i></i><i></i></div></div>
+      </div>
+      <div class="who"><strong>TRACE</strong><small>COASTAL DATA ASSISTANT • ONLINE</small></div>
+      <button class="assist-close" id="assistClose" type="button" aria-label="Close assistant">CLOSE</button>
+    </div>
+    <div class="assist-log" id="assistLog"></div>
+    <div class="suggest" id="assistSuggest"></div>
+    <form class="assist-form" id="assistForm">
+      <input id="assistInput" autocomplete="off" placeholder="Ask anything: India, 1+12, rivers…">
+      <button type="submit" id="assistGo">GO</button>
+    </form>
+    <div class="assist-exit">
+      <p>PRESS ESC OR CLOSE TO EXIT</p>
+      <button type="button" id="assistCloseFoot">CLOSE CHAT</button>
+    </div>
+  </div>
+  <button class="assist-fab" id="assistFab" aria-label="Open TRACE assistant">
+    <span class="ping"></span>
+    <div class="mini"><div class="mini-ring"><div class="mini-face"><i></i><i></i></div></div></div>
+  </button>
+</div>
+
+<script>
+const DATA = [
+["India","Asia",17.8],["Nigeria","Africa",6.78],["Indonesia","Asia",6.43],["China","Asia",5.39],["Pakistan","Asia",4.93],
+["Bangladesh","Asia",3.36],["Russia","Europe",3.27],["Brazil","South America",2.77],["Thailand","Asia",1.91],["Democratic Republic of Congo","Africa",1.85],
+["Philippines","Asia",1.57],["Egypt","Africa",1.55],["Iraq","Asia",1.54],["Tanzania","Africa",1.49],["Mexico","North America",1.47],
+["Vietnam","Asia",1.45],["Myanmar","Asia",1.39],["Ethiopia","Africa",1.25],["Uganda","Africa",1.19],["South Africa","Asia",1.17],
+["Kenya","Africa",1.16],["Iran","Asia",1.08],["Angola","Africa",1.06],["Sudan","Africa",1.02],["Turkey","Asia",0.93],
+["Afghanistan","Asia",0.88],["Cameroon","Africa",0.83],["Ukraine","Europe",0.8],["Cambodia","Asia",0.79],["Cote d'Ivoire","Africa",0.76],
+["Uzbekistan","Asia",0.76],["Ghana","Africa",0.74],["Morocco","Africa",0.74],["Algeria","Africa",0.73],["Argentina","South America",0.67],
+["North Korea","Asia",0.66],["Syria","Asia",0.63],["Yemen","Asia",0.63],["Mozambique","Africa",0.62],["Sri Lanka","Asia",0.53],
+["Peru","South America",0.52],["Guatemala","North America",0.51],["Venezuela","South America",0.48],["Kazakhstan","Asia",0.46],["Nepal","Asia",0.46],
+["Haiti","North America",0.44],["Somalia","Africa",0.43],["Chad","Africa",0.41],["Senegal","Africa",0.41],["South Sudan","Asia",0.41],
+["Zambia","Africa",0.41],["Mali","Africa",0.39],["Rwanda","Africa",0.39],["Malaysia","Asia",0.38],["Madagascar","Africa",0.37],
+["Burkina Faso","Africa",0.36],["Malawi","Africa",0.33],["Benin","Africa",0.32],["Zimbabwe","Africa",0.31],["Paraguay","South America",0.3],
+["Tajikistan","Asia",0.3],["Colombia","South America",0.29],["Burundi","Africa",0.28],["Romania","Europe",0.27],["Papua New Guinea","Africa",0.25],
+["Tunisia","Africa",0.25],["Honduras","North America",0.24],["Jordan","Asia",0.24],["Laos","Asia",0.24],["Serbia","Europe",0.24],
+["Kyrgyzstan","Asia",0.23],["Niger","Africa",0.23],["Nicaragua","North America",0.19],["Togo","Africa",0.19],["Azerbaijan","Asia",0.17],
+["Ecuador","South America",0.17],["El Salvador","North America",0.17],["Guinea","Africa",0.16],["Mauritania","Africa",0.16],["Bolivia","South America",0.15],
+["Congo","Africa",0.15],["Dominican Republic","Africa",0.15],["Turkmenistan","Asia",0.14],["Liberia","Africa",0.12],["Sierra Leone","Africa",0.12],
+["Belarus","Europe",0.11],["Bulgaria","Europe",0.1],["Central African Republic","Africa",0.1],["Cuba","North America",0.09],["Lesotho","Africa",0.09],
+["United States","Asia",0.09],["Eritrea","Africa",0.08],["Lebanon","Asia",0.08],["Libya","Africa",0.08],["Panama","North America",0.08],
+["Namibia","Africa",0.07],["Bosnia and Herzegovina","Africa",0.06],["Botswana","Africa",0.06],["Equatorial Guinea","Africa",0.06],["Gambia","Africa",0.06],
+["Mongolia","Asia",0.06],["Costa Rica","North America",0.05],["Georgia","Asia",0.05],["Jamaica","North America",0.05],["Palestine","Asia",0.05],
+["Albania","Europe",0.04],["Djibouti","Africa",0.04],["Eswatini","Africa",0.04],["Guinea-Bissau","Africa",0.04],["Armenia","Asia",0.03],
+["East Timor","Asia",0.03],["Moldova","Europe",0.03],["North Macedonia","Asia",0.03],["Chile","South America",0.02],["Comoros","Africa",0.02],
+["France","Europe",0.02],["Gabon","Africa",0.02],["Solomon Islands","Africa",0.02],["Canada","North America",0.01],["Germany","Europe",0.01],
+["Italy","Europe",0.01],["Japan","Asia",0.01],["Spain","Europe",0.01],["United Kingdom","Asia",0.01],["Australia","Oceania",0.0],
+["Norway","Europe",0.0],["Singapore","Asia",0.0],["Sweden","Europe",0.0]
+];
+const CITIES = {
+  mumbai:{city:"Mumbai",country:"India",note:"Monsoon runoff, dense drainage and a long shoreline make leakage control urgent. On this 2026 dashboard, India is the largest national source at 17.80% of global macroplastic emissions to the environment."},
+  manila:{city:"Manila",country:"Philippines",note:"River-connected waste pathways make source interception important. The Philippines is 1.57% of the latest published inventory on this 2026 dashboard."},
+  shanghai:{city:"Shanghai",country:"China",note:"A huge coastal economy sitting on river systems. China is 5.39% of the latest published inventory on this 2026 dashboard."},
+  jakarta:{city:"Jakarta",country:"Indonesia",note:"Low-lying districts and waterways raise the cost of unmanaged waste. Indonesia is 6.43% of the latest published inventory on this 2026 dashboard, third worldwide."},
+  lagos:{city:"Lagos",country:"Nigeria",note:"Fast coastal growth plus drainage pressure. Nigeria is 6.78% of the latest published inventory on this 2026 dashboard, second worldwide."},
+  "rio de janeiro":{city:"Rio de Janeiro",country:"Brazil",note:"Beaches, watersheds and dense development show how land waste can become a coastal issue. Brazil is 2.77% of the latest published inventory on this 2026 dashboard."},
+  rio:{city:"Rio de Janeiro",country:"Brazil",note:"Beaches, watersheds and dense development show how land waste can become a coastal issue. Brazil is 2.77% of the latest published inventory on this 2026 dashboard."}
+};
+const INLAND = {
+  "bengaluru":"Bengaluru (Bangalore)",
+  "bangalore":"Bengaluru (Bangalore)",
+  "banglore":"Bengaluru (Bangalore)",
+  "banglour":"Bengaluru (Bangalore)",
+  "bangaluru":"Bengaluru (Bangalore)",
+  "bengalore":"Bengaluru (Bangalore)",
+  "blr":"Bengaluru (Bangalore)",
+  "delhi":"Delhi",
+  "new delhi":"New Delhi",
+  "hyderabad":"Hyderabad",
+  "pune":"Pune",
+  "nagpur":"Nagpur",
+  "jaipur":"Jaipur",
+  "lucknow":"Lucknow",
+  "indore":"Indore",
+  "bhopal":"Bhopal",
+  "chandigarh":"Chandigarh"
+};
+function findInland(q){
+  const n=" "+q.toLowerCase().replace(/[^a-z0-9 ]+/g," ")+" ";
+  for(const [k,v] of Object.entries(INLAND)){
+    if(n.includes(" "+k+" ")) return v;
+  }
+  return null;
+}
+const CITY_WATER = {
+  mumbai:`Mumbai coastal water quality — published checks, not a live sensor on this page.
+
+Sewage load (MPCB affidavit to the NGT, 2025): Mumbai makes about 2,814 million litres of sewage a day. About 1,338 MLD — nearly half — still reaches the Arabian Sea untreated.
+
+Organic pollution: a BMC sewerage-project study reported seawater BOD around 100 mg/L at Bandra and Versova and about 50 mg/L at Juhu. CPCB’s usual coastal limit cited in that reporting is 10 mg/L, so those readings are several times too high.
+
+Bacteria: studies of Mumbai beaches (Juhu, Versova, Girgaon, Dadar, Bandra, Aksa and others) have found total/faecal coliform often 1,600–2,400+ MPN/100 ml. CPCB’s bathing-water guide is much lower (about 100 MPN/100 ml for SW-II waters). A 2025 Water Quality Index paper using CPCB-style parameters rated several Mumbai sites Poor to Very Poor.
+
+Plastic and monsoon: The Ocean Cleanup estimated about 5,000 tonnes of plastic a year entering the Arabian Sea through about 50 Mumbai drains. In July 2026 BMC lifted about 2,500 tonnes of waste off the city’s beaches after high tide and rain. Juhu and Versova have been classed extremely dirty on a coastal cleanliness index.
+
+TRACE does not have a live Mumbai coast meter. These are published snapshots. Levels change with tide, rain and outfalls.`
+};
+const REGIONS = [["Asia",55.65],["Africa",29.93],["South America",5.37],["Europe",5.09],["North America",3.61],["Oceania",0.31]];
+
+let ACTIVE_DATA = DATA.slice();
+const SKIP_PLACES=new Set(["Asia","Africa","Europe","North America","South America","Oceania","World","Earth","European Union","High-income countries","Low-income countries","Upper-middle-income countries","Lower-middle-income countries"]);
+let unique = [...new Map(ACTIVE_DATA.filter(d=>!SKIP_PLACES.has(d[0])).map(d=>[d[0],d])).values()].sort((a,b)=>b[2]-a[2]);
+const rows=document.getElementById("dataRows");
+const search=document.getElementById("search");
+const filter=document.getElementById("regionFilter");
+function interpretation(v){
+  if(v>=5) return "Very large share of the global signal";
+  if(v>=1) return "Large country-level contribution";
+  if(v>=.25) return "Meaningful contribution";
+  if(v>0) return "Smaller measured contribution";
+  return "Near-zero in this briefing series";
+}
+function renderTable(){
+  const q=search.value.toLowerCase().trim(), f=filter.value;
+  rows.innerHTML="";
+  unique.filter(d=>(!q||d[0].toLowerCase().includes(q))&&(f==="all"||d[1]===f)).forEach(d=>{
+    const tr=document.createElement("tr");
+    tr.innerHTML=`<td><b>${d[0]}</b></td><td>${d[1]}</td><td>${d[2].toFixed(2)}%</td><td><span class="pill">${interpretation(d[2])}</span></td>`;
+    rows.appendChild(tr);
+  });
+}
+search.addEventListener("input",renderTable); filter.addEventListener("change",renderTable);
+function refreshData(next){
+  ACTIVE_DATA = next.filter(d=>Number.isFinite(d[2]) && !SKIP_PLACES.has(d[0]));
+  unique = [...new Map(ACTIVE_DATA.map(d=>[d[0],d])).values()].sort((a,b)=>b[2]-a[2]);
+  document.getElementById("reportedCount").textContent=unique.length;
+  renderTable();
+  drawCountry("10");
+}
+document.getElementById("reportedCount").textContent=unique.length;
+renderTable();
+function fitCanvas(canvas, ratio=2){
+  const dpr=Math.max(1,window.devicePixelRatio||1);
+  const rect=canvas.getBoundingClientRect();
+  canvas.width=Math.max(1,Math.floor(rect.width*dpr));
+  canvas.height=Math.max(1,Math.floor(rect.width/ratio*dpr));
+  const c=canvas.getContext("2d"); c.setTransform(dpr,0,0,dpr,0,0); return c;
+}
+function drawRegion(){
+ const c=document.getElementById("regionChart"),ctx=fitCanvas(c,1.8),w=c.clientWidth,h=c.clientHeight;
+ ctx.clearRect(0,0,w,h);
+ const left=150,right=45,top=38,row=55,max=85;
+ ctx.font="11px Space Mono, monospace";
+ REGIONS.forEach((d,i)=>{
+   const y=top+i*row;
+   ctx.fillStyle="#333";ctx.fillText(d[0],18,y+12);
+   ctx.fillStyle="#d1d1cc";ctx.fillRect(left,y,w-left-right,22);
+   ctx.fillStyle="#1f4a53";ctx.fillRect(left,y,(w-left-right)*(d[1]/max),22);
+   ctx.fillStyle="#151515";ctx.fillText(d[1].toFixed(2)+"%",left+8+(w-left-right)*(d[1]/max),y+15);
+ });
+ ctx.fillStyle="#777";ctx.font="9px Space Mono, monospace";ctx.fillText("SHARE OF GLOBAL ENVIRONMENTAL-EMISSION INVENTORY / 2026 BRIEFING",18,h-12);
+}
+function drawCountry(topN="10"){
+ const c=document.getElementById("countryChart");
+ const data=topN==="all"?unique:unique.slice(0,Number(topN));
+ const rowH=30, needed=Math.max(360,data.length*rowH+60);
+ c.style.width="100%";
+ c.style.height=needed+"px";
+ c.width=780;c.height=needed;
+ const ctx=c.getContext("2d");ctx.clearRect(0,0,c.width,c.height);
+ const left=190,max=Math.max(...data.map(d=>d[2]),0.01),barW=520;
+ ctx.font="10px Space Mono, monospace";
+ data.forEach((d,i)=>{
+   const y=35+i*rowH;
+   ctx.fillStyle="#2d2d2d";ctx.fillText(d[0].slice(0,25),10,y+10);
+   ctx.fillStyle="#d0d0cb";ctx.fillRect(left,y,barW,12);
+   ctx.fillStyle="#1f4a53";ctx.fillRect(left,y,barW*(d[2]/max),12);
+   ctx.fillStyle="#151515";ctx.fillText(d[2].toFixed(2)+"%",left+barW+10,y+10);
+ });
+ ctx.fillStyle="#777";ctx.font="9px Space Mono, monospace";ctx.fillText("SORTED HIGH → LOW / SOURCE-REPORTED VALUES",10,needed-15);
+}
+drawRegion();drawCountry("10");
+async function loadFullOWID(){
+  const url="https://ourworldindata.org/grapher/plastic-pollution.csv?v=1&csvType=full&useColumnShortNames=false";
+  try{
+    const res=await fetch(url,{cache:"no-store"});
+    if(!res.ok) throw new Error("network");
+    const text=await res.text();
+    const lines=text.replace(/\r/g,"").trim().split("\n");
+    const head=lines.shift().split(",");
+    const entity=head.findIndex(x=>x.toLowerCase()==="entity");
+    const year=head.findIndex(x=>x.toLowerCase()==="year");
+    const value=head.findIndex(x=>x.toLowerCase().includes("plastic"));
+    if(entity<0||year<0||value<0) throw new Error("schema");
+    const raw=[];
+    let world=0;
+    for(const line of lines){
+      const parts=line.split(",");
+      const name=parts[entity];
+      const y=Number(parts[year]), v=Number(parts[value]);
+      if(y===2020 && name && Number.isFinite(v)){
+        if(name==="World") world=v;
+        else raw.push([name,v]);
+      }
+    }
+    if(!world) world=52106292;
+    const parsed=raw.filter(d=>!SKIP_PLACES.has(d[0]) && !/\(UN M49\)|income countries|World|Earth/.test(d[0]))
+      .map(d=>[d[0],inferRegion(d[0]),+(100*d[1]/world).toFixed(2)]);
+    if(parsed.length>100){
+      refreshData(parsed);
+      const src=document.querySelector("#global .source");
+      if(src) src.textContent="Live inventory snapshot loaded from Our World in Data / Cottom et al. (2024), last updated January 2026 and shown as the 2026 briefing. If offline, the embedded fallback remains available.";
+    }
+  }catch(e){}
+}
+function inferRegion(name){
+  const a={
+    Asia:["India","China","Philippines","Malaysia","Indonesia","Vietnam","Bangladesh","Thailand","Japan","Pakistan","Sri Lanka","Turkey","Iran","Iraq","Saudi","UAE","Qatar","Kuwait","Oman","Yemen","Israel","Jordan","Lebanon","Syria","Palestine","Singapore","Brunei","Taiwan","Korea","Myanmar","Cambodia","East Timor","Timor","Hong Kong","Macau"],
+    Africa:["Nigeria","Cameroon","Ghana","Tanzania","Algeria","Morocco","Egypt","Kenya","Liberia","Sierra","South Africa","Mozambique","Madagascar","Gabon","Gambia","Senegal","Benin","Togo","Guinea","Congo","Cote","Ivory","Angola","Libya","Tunisia","Mauritania","Namibia","Somalia","Sudan","Djibouti","Eritrea","Seychelles","Mauritius","Comoros","Cape Verde"],
+    Europe:["Albania","Belgium","France","Germany","Greece","Croatia","Spain","Portugal","Italy","Norway","Sweden","Finland","Denmark","Iceland","Ireland","Netherlands","Poland","Romania","Bulgaria","Estonia","Latvia","Lithuania","Cyprus","Malta","Montenegro","Russia","Ukraine","Slovenia","Slovakia","Bosnia","United Kingdom","Monaco"],
+    "North America":["United States","Canada","Mexico","Guatemala","Haiti","Dominican","Panama","Costa Rica","Honduras","Nicaragua","El Salvador","Jamaica","Bahamas","Barbados","Grenada","Dominica","Saint Lucia","Saint Vincent","Puerto Rico","Cuba","Belize","Aruba","Guadeloupe","Martinique","Trinidad"],
+    "South America":["Brazil","Argentina","Chile","Peru","Colombia","Venezuela","Ecuador","Guyana","Suriname","Uruguay","Paraguay","Bolivia","French Guiana"],
+    Oceania:["Australia","New Zealand","Fiji","Papua","Samoa","Tonga","Solomon","Kiribati","Marshall","Micronesia","Palau","Vanuatu"],
+  };
+  for(const [r,names] of Object.entries(a)) if(names.some(x=>name.toLowerCase().includes(x.toLowerCase()))) return r;
+  return "Other";
+}
+window.addEventListener("resize",()=>{drawRegion();drawCountry(document.querySelector(".chip.active").dataset.top)});
+document.querySelectorAll(".chip").forEach(b=>b.addEventListener("click",()=>{
+ document.querySelectorAll(".chip").forEach(x=>x.classList.remove("active"));b.classList.add("active");drawCountry(b.dataset.top);
+}));
+const io=new IntersectionObserver(entries=>entries.forEach(e=>{if(e.isIntersecting)e.target.classList.add("show")}),{threshold:.08});
+document.querySelectorAll(".reveal").forEach(x=>io.observe(x));
+loadFullOWID();
+
+const NEWS = [
+  {topic:"mumbai",date:"27 Jul 2026",source:"The Indian Express",title:"2,500 tonnes washed back onto Mumbai beaches",blurb:"After a week of rain and high tide, BMC crews cleared more than 2,500 metric tonnes of plastic, thermocol, clothes and other debris. Officials said waste dumped into drains was carried to the Arabian Sea, then pushed ashore.",url:"https://indianexpress.com/article/cities/mumbai/mumbai-beaches-garbage-monsoon-bmc-cleanup-drive-10804833/"},
+  {topic:"mumbai",date:"27 Jul 2026",source:"Outlook India",title:"The sea is returning Mumbai’s garbage",blurb:"Outlook’s briefing on the same clean-up: about 2,499 tonnes lifted in 11 days, with waves above 4.5 m expected to bring marine debris back onto the sand.",url:"https://www.outlookindia.com/national/the-sea-is-returning-mumbais-garbage-how-2500-tonnes-of-waste-washed-up-on-the-citys-beaches"},
+  {topic:"mumbai",date:"3 Mar 2026",source:"The Indian Express",title:"5 million kg of plastic a year through Mumbai nallahs",blurb:"A year-long Ocean Cleanup survey (May 2024–May 2025) estimated about 5 million kilograms of plastic entering the Arabian Sea from around 50 drains. Thane, Malad and Vasai creeks were named as large contributors.",url:"https://indianexpress.com/article/cities/mumbai/5-million-kilos-plastic-dumped-mumbais-sea-every-year-10562765/"},
+  {topic:"action",date:"10 Feb 2026",source:"The Ocean Cleanup",title:"Cleanup systems planned for Mumbai waterways",blurb:"Mumbai was listed among 30 cities chosen to cut a large share of river-based plastic. First barrier deployments were planned for 2026 on the Trombay and Malad waterways.",url:"https://theoceancleanup.com/press/press-releases/the-ocean-cleanup-enters-india/"},
+  {topic:"india",date:"7 Jun 2026",source:"Deccan Herald / FSI",title:"Monsoon moves nearly half of India’s marine litter",blurb:"Experts at a Fishery Survey of India workshop said about 46% of the country’s annual marine litter load is flushed in the southwest monsoon. Juhu and Versova were classed extremely dirty on a coastal cleanliness index.",url:"https://www.deccanherald.com/india/maharashtra/monsoon-flushes-nearly-half-of-marine-litter-into-sea-mumbai-beaches-among-worst-hit-fishery-survey-of-india-4030723"},
+  {topic:"science",date:"2024",source:"Cottom et al. / Nature",title:"India leads the published plastic-emission inventory",blurb:"The University of Leeds inventory behind this dashboard found India first for macroplastic emissions to the environment, about 9.3 million tonnes a year, then Nigeria, Indonesia and China. Uncollected waste is the main pathway in many countries.",url:"https://india.mongabay.com/2024/10/emissions-from-indias-macroplastic-pollution-is-the-highest-finds-study/"},
+  {topic:"action",date:"23 Jan 2026",source:"Mumbai Mirror",title:"Trash booms catch plastic before the wetlands",blurb:"A Kanjurmarg / Bhandup drain pilot reported trapping about 500–600 kg of plastic a day with floating booms, keeping waste out of wetlands that drain toward Thane Creek and the sea.",url:"https://mumbaimirror.indiatimes.com/mumbai/trash-booms-a-boon-for-mumbais-wetlands/articleshow/127177833.html"},
+  {topic:"india",date:"18 Sep 2025",source:"Times of India / MPCB",title:"About half of Mumbai sewage still untreated",blurb:"An MPCB affidavit reported to the NGT said Mumbai generates about 2,814 MLD of sewage and about 1,338 MLD still reaches the Arabian Sea untreated. That is a water-quality story, not the same number as the plastic table.",url:"https://timesofindia.indiatimes.com/city/mumbai/50-of-mumbais-sewage-flows-into-arabian-sea-untreated-daily-maharashtra-pollution-control-board-data/articleshow/123953854.cms"},
+  {topic:"science",date:"2025",source:"MoES / NCCR",title:"Beach litter share fell; microplastics remain",blurb:"A parliamentary reply on NCCR coastal surveys said plastic’s share of beach litter fell from 67% in 2018 to 43% in 2024, while microplastics and lost fishing gear remain a problem on both coasts.",url:"https://indianmasterminds.com/news/indias-coastal-survey-reveals-decline-in-beach-litter-but-microplastic-pollution-persists-parliament-questions-answer-135220/"},
+  {topic:"india",date:"11 Jul 2026",source:"Down To Earth",title:"From city drains to the ocean",blurb:"Down To Earth’s film follows waste from streets and the Mithi River in Mumbai to coasts in Kochi and Chennai. It treats ocean plastic as a land-to-sea system, which is the same idea as this interface.",url:"https://www.downtoearth.org.in/waste/sea-of-plastic-how-indias-waste-reaches-the-ocean"},
+  {topic:"science",date:"4 Jun 2026",source:"Environmental Monitoring and Assessment",title:"Ratnagiri beaches: smaller city, monsoon spike",blurb:"A year of sampling on Ratnagiri recreational beaches found lower debris than Mumbai or Goa, but monsoon months nearly doubled the load. Packaging and bags led the count in this Tier-2 coast study.",url:"https://link.springer.com/article/10.1007/s10661-026-15543-3"},
+  {topic:"mumbai",date:"13 Jul 2026",source:"The Indian Express",title:"Juhu closed in parts after a high-tide dump",blurb:"High tide left plastic, wrappers and sewage-tinged water on Juhu. Access to some stretches was limited while crews and lifeguards worked the shore — a snapshot, not a year-round lab score.",url:"https://indianexpress.com/article/trending/trending-in-india/juhu-beach-garbage-viral-video-high-tide-mumbai-pollution-10784528/"}
+];
+let newsTopic="all";
+function renderNews(){
+  const box=document.getElementById("newsGrid");
+  if(!box) return;
+  const q=(document.getElementById("newsSearch").value||"").toLowerCase().trim();
+  box.innerHTML="";
+  NEWS.filter(n=>(newsTopic==="all"||n.topic===newsTopic) && (!q || (n.title+" "+n.blurb+" "+n.source).toLowerCase().includes(q))).forEach(n=>{
+    const a=document.createElement("article");
+    a.className="news";
+    a.innerHTML=`<div class="when">${n.date} • ${n.source}</div><h3>${n.title}</h3><p>${n.blurb}</p><div class="foot"><span class="pill">${n.topic}</span><a class="more" href="${n.url}" target="_blank" rel="noopener">OPEN SOURCE</a></div>`;
+    box.appendChild(a);
+  });
+  if(!box.children.length){
+    const empty=document.createElement("article");
+    empty.className="news";
+    empty.innerHTML="<h3>No matching reports</h3><p>Try Mumbai, monsoon, sewage, or India.</p>";
+    box.appendChild(empty);
+  }
+}
+renderNews();
+const newsSearch=document.getElementById("newsSearch");
+if(newsSearch) newsSearch.addEventListener("input",renderNews);
+document.querySelectorAll("#newsChips .chip").forEach(b=>b.addEventListener("click",()=>{
+  document.querySelectorAll("#newsChips .chip").forEach(x=>x.classList.remove("active"));
+  b.classList.add("active");
+  newsTopic=b.dataset.topic;
+  renderNews();
+}));
+(function(){
+  const box=document.getElementById("compare");
+  if(!box) return;
+  const before=document.getElementById("compareBeforeImg");
+  const line=document.getElementById("compareLine");
+  const knob=document.getElementById("compareKnob");
+  let down=false;
+  function setCut(clientX){
+    const r=box.getBoundingClientRect();
+    let pct=((clientX-r.left)/r.width)*100;
+    pct=Math.max(6,Math.min(94,pct));
+    if(before) before.style.clipPath="inset(0 "+(100-pct)+"% 0 0)";
+    if(line) line.style.left=pct+"%";
+    if(knob) knob.style.left=pct+"%";
+  }
+  box.addEventListener("pointerdown",e=>{down=true;box.setPointerCapture(e.pointerId);setCut(e.clientX)});
+  box.addEventListener("pointermove",e=>{if(down) setCut(e.clientX)});
+  ["pointerup","pointercancel"].forEach(ev=>box.addEventListener(ev,()=>{down=false}));
+})();
+
+/* TRACE assistant */
+const root=document.getElementById("assistRoot");
+const log=document.getElementById("assistLog");
+const form=document.getElementById("assistForm");
+const input=document.getElementById("assistInput");
+const suggestBox=document.getElementById("assistSuggest");
+const statusEl=document.querySelector(".assist-head small");
+const SUGGEST=["How can we prevent water pollution?","How is water purified?","Top 10 countries","Tell me about India","Water pollution level in Mumbai"];
+let busy=false;
+function setStatus(t,busyFlag){
+  if(!statusEl) return;
+  statusEl.textContent=t;
+  statusEl.classList.toggle("busy",!!busyFlag);
+}
+function openAssist(){root.classList.add("open");setTimeout(()=>input.focus(),50)}
+function closeAssist(){root.classList.remove("open")}
+document.getElementById("assistFab").addEventListener("click",()=>{root.classList.contains("open")?closeAssist():openAssist()});
+document.getElementById("assistClose").addEventListener("click",closeAssist);
+document.getElementById("assistCloseFoot").addEventListener("click",closeAssist);
+document.addEventListener("keydown",e=>{
+  if(e.key==="Escape" && root.classList.contains("open")) closeAssist();
+});
+const heroBtn=document.getElementById("openAssistHero");
+if(heroBtn) heroBtn.addEventListener("click",openAssist);
+function addMsg(text,who){
+  const d=document.createElement("div");
+  d.className="msg "+who; d.textContent=text; log.appendChild(d); log.scrollTop=log.scrollHeight;
+  return d;
+}
+function showSuggest(list){
+  suggestBox.innerHTML="";
+  (list||SUGGEST).forEach(s=>{
+    const b=document.createElement("button"); b.type="button"; b.textContent=s;
+    b.addEventListener("click",()=>ask(s)); suggestBox.appendChild(b);
+  });
+}
+function typing(){
+  const d=document.createElement("div"); d.className="typing"; d.id="typing";
+  d.innerHTML="<b></b><b></b><b></b>"; log.appendChild(d); log.scrollTop=log.scrollHeight;
+}
+function stopTyping(){const t=document.getElementById("typing"); if(t) t.remove()}
+function escapeRe(s){return s.replace(/[.*+?^${}()|[\]\\]/g,"\\$&")}
+function findPlaces(q){
+  const n=" "+q.toLowerCase().replace(/[^a-z0-9&'. -]+/g," ")+" ";
+  const aliases=[["united states","United States"],["usa","United States"],["u.s.","United States"],["america","United States"],["united kingdom","United Kingdom"],["britain","United Kingdom"],["uk","United Kingdom"],["uae","United Arab Emirates"],["south korea","South Korea"],["ivory coast","Cote d'Ivoire"],["cote d ivoire","Cote d'Ivoire"],["philippines","Philippines"],["india","India"]];
+  const hits=[];
+  for(const [k,v] of aliases){
+    if(n.includes(" "+k+" ")){
+      const row=unique.find(d=>d[0]===v); if(row && !hits.some(h=>h[0]===row[0])) hits.push(row);
+    }
+  }
+  unique.forEach(d=>{
+    const name=d[0].toLowerCase();
+    if(name.length<4) return;
+    const re=new RegExp("(^|[^a-z])"+escapeRe(name)+("([^a-z]|$)"));
+    if(re.test(q.toLowerCase()) && !hits.some(h=>h[0]===d[0])) hits.push(d);
+  });
+  return hits;
+}
+function findCity(q){
+  const n=q.toLowerCase();
+  for(const [k,v] of Object.entries(CITIES)) if(n.includes(k)) return v;
+  return null;
+}
+function placeCard(place){
+  const rank=unique.findIndex(d=>d[0]===place[0])+1;
+  return `${place[0]} — ${place[1]}\n2026 briefing share (latest published inventory): ${place[2].toFixed(2)}%\nRank in this table: #${rank}\nReading: ${interpretation(place[2])}`;
+}
+function blocked(q){
+  return /(suicide|self[- ]?harm|kill myself|porn|sex|nude|nsfw|weapon|bomb|drug deal|how to make a gun)/i.test(q);
+}
+function cleanMathExpr(q){
+  let s=String(q||"");
+  s=s.replace(/what(?:'s| is|s)?|calculate|compute|solve|evaluate|equals?|answer(?: to)?|please|tell me|find|the result of|value of|\?/gi," ");
+  s=s.replace(/×|x(?=\s*\d)|X/g,"*").replace(/÷/g,"/").replace(/−/g,"-").replace(/\^/g,"**");
+  s=s.replace(/plus/gi,"+").replace(/minus/gi,"-").replace(/times|multiplied by/gi,"*").replace(/divided by|over/gi,"/");
+  s=s.replace(/to the power of/gi,"**");
+  s=s.replace(/(\d+(?:\.\d+)?)\s*%/g,"($1/100)");
+  s=s.replace(/sqrt\s*\(/gi,"Math.sqrt(").replace(/√\s*\(/g,"Math.sqrt(");
+  s=s.replace(/π|pi\b/gi,"Math.PI");
+  return s.replace(/\s+/g,"");
+}
+function looksLikeMath(q){
+  const s=String(q||"").trim();
+  if(!s) return false;
+  if(/[a-z]{4,}/i.test(s) && !/(what|is|plus|minus|times|divided|calculate|compute|solve|sqrt|power|percent)/i.test(s)) return false;
+  const expr=cleanMathExpr(s);
+  if(!/^[-+()*./\dMathPI]+$/.test(expr.replace(/Math\.(sqrt|PI)/g,"M"))) return false;
+  return /[-+*/]|\*\*|Math\.sqrt/.test(expr) && /\d/.test(expr);
+}
+function safeMath(q){
+  try{
+    const expr=cleanMathExpr(q);
+    if(!expr || expr.length>80) return null;
+    if(!/^[-+()*./\dMathPI]+$/.test(expr.replace(/Math\.(sqrt|PI)/g,"M"))) return null;
+    if(/[a-zA-Z]{5,}/.test(expr.replace(/Math\.(sqrt|PI)/g,""))) return null;
+    const val=Function('"use strict"; return ('+expr+")")();
+    if(typeof val!=="number" || !Number.isFinite(val)) return null;
+    const pretty=Number.isInteger(val)?String(val):String(parseFloat(val.toFixed(8)));
+    return {expr:cleanMathExpr(q).replace(/\*\*/g,"^").replace(/Math\.sqrt/g,"sqrt").replace(/Math\.PI/g,"pi"), value:pretty};
+  }catch(e){ return null; }
+}
+function answerGeneralLocal(qRaw){
+  const q=qRaw.toLowerCase().trim();
+  const now=new Date();
+  if(/^(what('?s| is) )?(the )?(time|date|day|today)\b/.test(q) || /what (day|date|time) is it/.test(q)){
+    return "Right now it is "+now.toLocaleString("en-IN",{weekday:"long",year:"numeric",month:"long",day:"numeric",hour:"numeric",minute:"2-digit"})+".";
+  }
+  if(/\b(capital of india|india'?s capital)\b/.test(q)) return "New Delhi is the capital of India.";
+  if(/\b(capital of (the )?usa|capital of america|capital of the united states)\b/.test(q)) return "Washington, D.C. is the capital of the United States.";
+  if(/\bhow many (days|hours|minutes) in (a )?year\b/.test(q)) return "A common year has 365 days (8,760 hours; 525,600 minutes). A leap year has 366 days.";
+  if(/\bsquare root of (\d+(?:\.\d+)?)/.test(q)){
+    const n=Number(q.match(/square root of (\d+(?:\.\d+)?)/)[1]);
+    return "The square root of "+n+" is "+parseFloat(Math.sqrt(n).toFixed(8))+".";
+  }
+  const math=safeMath(qRaw);
+  if(math) return math.expr+" = "+math.value;
+  return null;
+}
+const FAQ=[
+  [/microplastic/, "Microplastics are plastic pieces smaller than 5 mm. They form when bottles, bags, tyres and fibres break down. This page’s country table is the latest published environmental-emission inventory shown as a 2026 briefing, so microplastics are a related problem but not the same number, so microplastics are a related problem but not the same number."],
+  [/garbage patch|great pacific|gyre/, "A garbage patch is a zone where currents gather floating debris. The best known is the Great Pacific Garbage Patch. Most ocean plastic still starts on land and travels by rivers first, which is the pathway this dashboard maps."],
+  [/how long|decompose|break down|lasts? in (the )?ocean/, "Different plastics last for different times. A bottle can stay in the environment for hundreds of years, slowly breaking into smaller pieces instead of truly disappearing. That is why stopping leakage now matters more than waiting for the ocean to clean itself."],
+  [/single[- ]use|\bbottles?\b|\bbags?\b|packaging/, "Single-use items — bottles, bags, wrappers — are a large part of leakage because they are light, used once, and easy to wash into drains. Cities can cut this with collection, refill systems, and keeping those items out of stormwater."],
+  [/recycle|recycling/, "Recycling helps only if the item is collected, clean enough, and has a buyer. A lot of ocean-bound plastic never reaches a recycling plant. Collection and drain control come first; recycling is the next loop after waste is captured."],
+  [/monsoon|rain|stormwater|drain/, "Rain is a moving belt. When streets flood, uncollected plastic rides runoff into drains, canals and rivers. Coastal cities with strong monsoons or storms therefore need extra collection just before and during wet months."],
+  [/river|waterway|canal|yangtze|ganges|ganga|pasig/, "A small set of rivers carries a large share of modelled ocean plastic. Waste enters those rivers from cities along the banks. Intercepting material in the river is useful; stopping it on land before the river is better."],
+  [/\bfish\b|\bturtles?\b|\bwhales?\b|\bbirds?\b|\banimals?\b|marine life|wildlife/, "Animals can eat plastic or get tangled in it. That is one reason leakage to the sea matters. This dashboard does not count injured animals; it maps where modelled waste is most likely to reach the ocean so people can act upstream."],
+  [/biodegradable|compostable|bioplastic/, "Some eco-labelled plastics only break down in special industrial conditions. In a river or on a beach they can still last a long time. Treat them like ordinary waste: collect them, do not assume the ocean will digest them."],
+  [/climate|carbon|warming/, "Plastic and climate are linked because making plastic uses fossil fuels, and open burning of waste adds emissions. This page measures ocean-emission share, not carbon. Both problems get better when less waste is created and more is collected."],
+  [/innovatex|iit|techfest|bombay|who made|this (site|page|app|project)/, "COAST//TRACE is a visual research prototype built for InnovateX at Techfest, IIT Bombay. It turns a global plastic-pollution dataset into a readable page with charts, a country explorer, coastal city cards and this assistant."],
+  [/2019|why that year|old data/, "This is the 2026 dashboard. Country shares come from the latest complete published inventory (updated on Our World in Data in January 2026). Earth Action separately estimates about 72 million tonnes mismanaged worldwide in 2026."],
+  [/not (a )?city|city score|bar on the card/, "City cards on this page are design examples. The bars are interface indicators, not lab measurements of that city’s beaches. The hard number sits at country level in the explorer."],
+  [/chart|graph|how (do|to) read/, "The left chart shows each region’s share of the latest published inventory on this 2026 dashboard. The right chart ranks countries. A longer bar means a larger modelled share that year, not a live pollution sensor."],
+  [/search|explorer|table|filter/, "In Explorer, type a country name or pick a region. Each row shows the 2026 briefing share and a plain-language reading. You can also ask me the country name and I will look it up."],
+  [/student|school|what can kids|what can students/, "Students can map drains near school, run a dry-day vs rain-day litter count, choose reusable bottles, and present local photos next to this global chart. The global number is the briefing; the school street is the project."],
+  [/\bpolicy\b|\bgovernment\b|\blaws?\b|\bbans?\b|bottle-return|producer-responsibility/, "Bans, bottle-return schemes and producer-responsibility rules can cut leakage if collection actually happens. A law without bins and trucks does not stop a monsoon drain. Use the country signal, then inspect the local system."],
+  [/news|article|report|headline|what.?s new|field report/, "Open the Reports section for newspaper and science briefings on this page. Examples: BMC cleared about 2,500 tonnes from Mumbai beaches in July 2026; The Ocean Cleanup estimated about 5 million kg of plastic a year through Mumbai drains; Cottom et al. put India first in the plastic-emission inventory. Ask me “Mumbai news” or “Ocean Cleanup”."],
+  [/prevent|stop pollution|how to (keep|stop|reduce) water|purify|purification|clean water|boil water|treatment plant|diagram|how is water cleaned/, "Prevention first, then purification.\n\nPrevent: collect waste before rain, screen drains, use less single-use plastic, send sewage to a plant, keep oil and cleaners out of gutters.\n\nCity cleaning path: screen → settle → filter → disinfect → tap.\nHome path if officials say the tap is unsafe: let dirt settle, pour through a clean cloth, bring to a rolling boil, cool covered.\n\nBoiling does not remove every chemical or make seawater drinkable. Open the Solutions section to see the diagram."]
+];
+function tidyAsk(s){
+  return String(s||"").toLowerCase()
+    .replace(/\bcontry\b/g,"country").replace(/\bcountrys\b/g,"countries")
+    .replace(/\bcountrie\b/g,"country").replace(/\bnatione\b/g,"nation")
+    .replace(/\bdose\b/g,"does").replace(/\brelese\b/g,"release").replace(/\breleases\b/g,"releases")
+    .replace(/\bplastik\b/g,"plastic").replace(/\bpollutin\b/g,"pollution")
+    .replace(/\bamt\b/g,"amount").replace(/\bwich\b/g,"which").replace(/\bwhih\b/g,"which")
+    .trim();
+}
+function isRankingQ(q){
+  const s=tidyAsk(q);
+  const place=/(country|countries|nation|nations|world|worldwide|global)/.test(s);
+  const most=/(most|highest|worst|biggest|largest|top|leading|number one|#1|no\.?\s*1|maximum|greatest)/.test(s);
+  const topic=/(plastic|pollut|emit|emission|release|releases|released|dump|dumped|waste|ocean|water)/.test(s);
+  const who=/(which|what|who|whom)/.test(s);
+  return (place && most && topic) || (who && most && topic) || /top\s*(10|ten|20|twenty)|who emits|leading countr/.test(s);
+}
+function answerLocal(qRaw){
+  const q=tidyAsk(qRaw);
+  const places=findPlaces(q);
+  const city=findCity(q);
+  if(blocked(q)) return {ok:true,strong:true,text:"I cannot help with that. Ask me about plastic pollution, rivers, coasts, a country in this dataset, or a school-safe general question such as math.", next:SUGGEST};
+
+  const general=answerGeneralLocal(qRaw);
+  if(general) return {ok:true,strong:true,text:general, next:["What is 1+12","Top 10 countries","Tell me about India"]};
+
+  if(/^(hi|hello|hey|yo|sup|good morning|good evening|good afternoon)\b/.test(q)){
+    return {ok:true,strong:true,text:"Hello — TRACE is on. Ask about this page, a country share, a coastal city, rivers, recycling — or a general question such as “what is 1+12”.", next:SUGGEST};
+  }
+  if(/who are you|what are you|your name|are you (an )?ai|are you a bot/.test(q)){
+    return {ok:true,strong:true,text:"I am TRACE, the assistant inside COAST//TRACE. I cannot store all of Google in this file. Instead I answer from the plastic-pollution table on this page, solve school math, and look up public facts (encyclopedia, dictionary, country data) when you ask something wider.", next:SUGGEST};
+  }
+  if(/help|what can you|how do i use|commands|examples/.test(q)){
+    return {ok:true,strong:true,text:"Ask me almost anything, for example:\n• What is 1+12?\n• What is India’s share?\n• Compare India and China\n• Why do rivers matter?\n• What are microplastics?\n• How long does a bottle last?\n• Tell me about Manila\nIf I do not have a built-in note, I look the idea up and still try to give a clear answer.", next:SUGGEST};
+  }
+  if(/source|meijer|owid|our world|dataset|where.*data|method|measure|what does this|trust|uncertain|how.*(calculated|estimated)/.test(q)){
+    return {ok:true,strong:true,text:"This is the 2026 dashboard. Country shares come from the latest complete published inventory (Cottom et al. 2024 / Our World in Data, January 2026). Earth Action estimates about 72 million tonnes of plastic will be mismanaged into the environment in 2026. Ocean leakage is still estimated at about 1–2 million tonnes a year.\n\nIt is a model of mismanaged waste and river pathways — not a live beach camera. It focuses on larger floating items and has uncertainty. Use it to spot geographic signals, then study local drains, collection and rivers.", next:["Top 10 countries","Tell me about India","Why coastal cities?"]};
+  }
+  if(/purify|purification|clean(ing)? water|boil water|treatment plant|how is water cleaned|diagram/.test(q)){
+    return {ok:true,strong:true,text:"City plants clean water in a train:\n1. Screen out trash and grit.\n2. Let mud settle in a tank.\n3. Filter through sand or carbon.\n4. Disinfect under trained control.\n5. Send tested water to taps.\n\nIf officials say boil water at home: let dirt settle, pour through a clean cloth, bring to a rolling boil, then cool covered.\n\nBoiling helps with many germs. It does not strip out every chemical and it does not make seawater drinkable. Open Solutions for the diagram.", next:["How can we prevent water pollution?","What does this measure?"]};
+  }
+  if(/prevent|stop pollution|keep water clean|how to (keep|stop|reduce) water/.test(q)){
+    return {ok:true,strong:true,text:"Ways to prevent water pollution:\n1. Collect street waste before rain.\n2. Screen drains and set river trash booms.\n3. Cut single-use bottles and bags.\n4. Send sewage to a treatment plant — do not dump it in a creek.\n5. Keep paint, oil and strong cleaners out of gutters.\n6. Extra clean-up in monsoon weeks, when plastic moves fastest.\n\nPrevention is cheaper than scraping beaches after the tide returns the waste. See Solutions for the diagram.", next:["How is water purified?","Water pollution level in Mumbai"]};
+  }
+  if(/how can (cities|we|people|i)|what can (i|we|cities)|solution|reduce|prevent|stop plastic|help the ocean|what should/.test(q)){
+    return {ok:true,strong:true,text:"A working sequence for coastal cities:\n1. Collect waste before it reaches drains.\n2. Watch rainfall — that is when plastic moves fastest.\n3. Catch material in rivers and canals before the sea.\n4. Cut single-use items and improve recycling.\n5. Design the plan from local evidence, not only a national percentage.\n\nThe country share shows where the global signal is strong. The city still needs its own collection map.", next:["Why coastal cities?","Tell me about Mumbai","What does this measure?"]};
+  }
+  if(/why coastal|coastal cit|moving ashore|why cities|why does it matter/.test(q)){
+    return {ok:true,strong:true,text:"Most ocean plastic starts on land. Cities pack people, packaging and rain into a small area. If collection fails, waterways become conveyor belts to the sea. Coastal cities sit at that last step, which is why this page moves from country signal to city systems.", next:["Tell me about Manila","How can cities help?","Top 10 countries"]};
+  }
+  if(/which region|regional share|asia share|africa share|who leads/.test(q) || ((/asia|africa|europe|oceania|north america|south america/.test(q)) && /share|percent|%|signal|region/.test(q))){
+    const lines=REGIONS.map(r=>"• "+r[0]+": "+r[1].toFixed(2)+"%").join("\n");
+    return {ok:true,strong:true,text:"2026 briefing — regional share of the latest published inventory:\n"+lines+"\n\nAsia is about 56% and Africa about 30% in the latest published inventory shown on this 2026 dashboard. These are environmental emissions, not a live ocean count.", next:["Top 10 countries","Tell me about the Philippines","What does this measure?"]};
+  }
+  if(isRankingQ(qRaw) || isRankingQ(q)){
+    const n=/20|twenty/.test(q)?20:10;
+    const list=unique.slice(0,n).map((d,i)=>(i+1)+". "+d[0]+" — "+d[2].toFixed(2)+"% ("+d[1]+")").join("\n");
+    const waterAsk=/water|sewage|ocean|marine|lake/.test(q);
+    const head=waterAsk
+      ? "There is no single official score for “water pollution” in every country. On THIS page, the comparable number is each country’s share of modelled macroplastic emissions to the environment (Cottom et al. 2024 / OWID), shown as the 2026 briefing.\n\nIn that inventory India is first, about 17.80% of the global signal (about 9.3 million tonnes of macroplastic emissions a year in the underlying study). Next are Nigeria, Indonesia and China.\n\n"
+      : "Top "+n+" places on this 2026 briefing:\n";
+    return {ok:true,strong:true,text:head+(waterAsk?("Top "+n+" in this plastic-emission table:\n"+list+"\n\nThat is not the same as “who dumped the most sewage” or “who has the dirtiest rivers.” Those use different tests (BOD, coliform, nutrients, chemicals) and there is no one live world meter."): (list+"\n\nThis is a national pathway estimate, not a city cleanliness score.")), next:["Tell me about India","What does this measure?","Water pollution level in Mumbai"]};
+  }
+  if((/compare|vs\b|versus|difference between/.test(q) || places.length>=2) && places.length>=2){
+    const lines=places.slice(0,3).map(d=>"• "+d[0]+" ("+d[1]+"): "+d[2].toFixed(2)+"% — "+interpretation(d[2])).join("\n");
+    return {ok:true,strong:true,text:"Side-by-side from the same 2026 briefing series:\n"+lines+"\n\nA higher share means a larger modelled contribution to global environmental emissions. It does not mean one city is dirtier than another.", next:["What does this measure?","Top 10 countries"]};
+  }
+  if(city && /water quality|pollution level|\bpollution\b|how polluted|how dirty|bod\b|coliform|sewage|untreated|safe to (swim|bathe)|bathing water|beach water|coastal water|coast of/.test(q)){
+    const extra=CITY_WATER[city.city.toLowerCase()] || "";
+    if(extra) return {ok:true,strong:true,text:extra, next:["Tell me about Mumbai","How can cities help?","What does this measure?"]};
+  }
+  if(city && /^(tell me about|what about|explain|describe)?\s*(mumbai|manila|shanghai|jakarta|lagos|rio( de janeiro)?)\s*[?.!]*$/.test(q)){
+    const nat=unique.find(d=>d[0]===city.country);
+    return {ok:true,strong:true,text:city.city+" is a coastal-system example, not a measured city score.\n\n"+city.note+(nat?"\n\nCountry record:\n"+placeCard(nat):"")+"\n\nUse the city card to inspect drainage, collection and river mouths — not as a ranking. If you want water-quality readings, ask “what is the water pollution level on the coast of Mumbai?”", next:["Water pollution level in Mumbai","How can cities help?",city.country]};
+  }
+  if(city && !/share|percent|rank|emission|plastic table|dashboard/.test(q)){
+    const key=Object.keys(CITY_WATER).find(k=>q.includes(k));
+    if(key && /pollut|water|sewage|beach|coast|quality|dirty|clean/.test(q)){
+      return {ok:true,strong:true,text:CITY_WATER[key], next:["How can cities help?","What does this measure?"]};
+    }
+  }
+  if(/news|articles?|reports?|headline|field report|ocean cleanup|trash boom/.test(q)){
+    const hits=NEWS.filter(n=>(n.title+" "+n.blurb+" "+n.source+" "+n.topic).toLowerCase().split(/\W+/).some(w=>w.length>3 && q.includes(w)));
+    const pick=(hits.length?hits:NEWS).slice(0,4);
+    const lines=pick.map(n=>"• "+n.date+" — "+n.title+" ("+n.source+")").join("\n");
+    return {ok:true,strong:true,text:"Reports on this page (summaries, not the full newspaper):\n"+lines+"\n\nScroll to Reports. These are published stories, not a live beach camera.", next:["Water pollution level in Mumbai","Top 10 countries","What does this measure?"]};
+  }
+  const inland=findInland(q);
+  if(inland && /coast of|beach|sea water|ocean/.test(q) && /pollut|quality|level/.test(q)){
+    return {ok:true,strong:true,text:inland+" is inland — it does not have a sea coast, so there is no coastal seawater reading for it on this page.\n\nAsk about a named lake (for example Bellandur Lake) or a real coastal city such as Mumbai. TRACE will look the name up; it will not invent a pollution score.", next:["Water pollution level in Mumbai","What does this measure?"]};
+  }
+  if(isPlaceWaterQ(q) && !(city && CITY_WATER[city.city.toLowerCase()])){
+    return {ok:false,strong:false,lookup:true,text:"",next:SUGGEST};
+  }
+  if(places.length===1 && (places[0][0].length>3 || /share|percent|rank|data|number|figure/.test(q) || q.split(/\s+/).length<=4)){
+    const place=places[0];
+    search.value=place[0]; filter.value="all"; renderTable();
+    return {ok:true,strong:true,text:placeCard(place)+"\n\nI also filtered the explorer table to this place. The percentage is a national share from the latest published inventory, shown on this 2026 dashboard — not a live city measurement.", next:["Top 10 countries","What does this measure?","Why coastal cities?"]};
+  }
+  if(!isPlaceWaterQ(q)){
+    for(const [re,text] of FAQ){
+      if(re.test(q)) return {ok:true,strong:true,text:text,next:SUGGEST};
+    }
+  }
+  if(/350|1–2|1-2 million|how much plastic|plastic waste generated|how much.*ocean/.test(q)){
+    return {ok:true,strong:true,text:"Scale check from this page:\n• About 350 million tonnes of plastic waste are generated worldwide each year.\n• About 1–2 million tonnes are estimated to reach the ocean.\n• That is roughly 0.5% of all plastic waste.\n• On this 2026 dashboard, Asia accounts for about 56% of the latest published environmental-emission inventory and Africa about 30%. Earth Action estimates about 72 million tonnes of plastic will be mismanaged into the environment in 2026.\n\nAsk a country name for its exact share.", next:SUGGEST};
+  }
+  if(/plastic|ocean|pollution|waste|river|coast|marine/.test(q)){
+    return {ok:true,strong:false,text:"From this dashboard: about 350 million tonnes of plastic waste are made each year, and about 1–2 million tonnes reach the ocean. Most of that journey starts on land, then uses drains and rivers. Ask a country name for its share, or ask a specific idea such as microplastics, recycling, or monsoon runoff.", next:SUGGEST};
+  }
+  return {ok:false,strong:false,text:"",next:SUGGEST};
+}
+function isPlaceWaterQ(q){
+  const s=String(q||"").toLowerCase();
+  const water=/\b(lake|lakes|ocean|oceans|sea|seas|coast|coastal|beach|beaches|bay|creek|lagoon|reservoir|harbour|harbor|wetland|pond|estuary|mangrove)\b/.test(s);
+  const ask=/\b(pollut|quality|level|clean|dirty|safe|how|what|where|tell|about)\b/.test(s);
+  return water && ask;
+}
+function waterLookupQuery(userText){
+  const s=String(userText||"").replace(/[?!.]/g," ").replace(/\s+/g," ").trim();
+  const cleaned=s.replace(/^(what is|what's|whats|how polluted is|pollution level (from|of|in|on)|water quality (of|in|at)|tell me about)\s+/i,"");
+  return cleaned || s;
+}
+function snapshotFacts(){
+  return unique.slice(0,12).map(d=>d[0]+" "+d[2].toFixed(2)+"%").join("; ");
+}
+async function fetchJSON(url,ms){
+  const ctrl=new AbortController();
+  const t=setTimeout(()=>ctrl.abort(),ms||8000);
+  try{
+    const res=await fetch(url,{signal:ctrl.signal});
+    if(!res.ok) throw new Error("http");
+    const ct=res.headers.get("content-type")||"";
+    if(ct.includes("application/json")) return await res.json();
+    return await res.text();
+  }finally{clearTimeout(t)}
+}
+function searchKeys(q){
+  const stop=new Set(["who","what","when","where","why","how","is","are","was","were","the","a","an","of","in","on","to","for","did","does","do","can","could","would","should","you","tell","me","about","please","define","explain","meaning","invented","invention","made","create","created"]);
+  const words=q.toLowerCase().replace(/[^a-z0-9\s-]/g," ").split(/\s+/).filter(w=>w && !stop.has(w));
+  const joined=words.join(" ").trim();
+  const last=words.filter(w=>w.length>3);
+  return [...new Set([q.trim(), joined, last.slice(-2).join(" "), last[last.length-1]||""])].filter(s=>s && s.length>2);
+}
+async function wikiAnswer(userText){
+  let title="", excerpt="";
+  for(const key of searchKeys(userText)){
+    try{
+      const data=await fetchJSON("https://en.wikipedia.org/w/rest.php/v1/search/page?limit=1&q="+encodeURIComponent(key),7000);
+      const page=data && data.pages && data.pages[0];
+      if(page && page.title){ title=page.title; excerpt=(page.excerpt||"").replace(/<[^>]+>/g," "); break; }
+    }catch(e){}
+    try{
+      const data=await fetchJSON("https://en.wikipedia.org/w/api.php?action=opensearch&limit=1&namespace=0&format=json&origin=*&search="+encodeURIComponent(key),7000);
+      if(data && data[1] && data[1][0]){ title=data[1][0]; excerpt=data[2] && data[2][0] || ""; break; }
+    }catch(e){}
+  }
+  if(!title) throw new Error("no title");
+  if(/^(pollution|water|water pollution|environment)$/i.test(title) && /countr|nation|which|who|most|top/.test(userText)){
+    throw new Error("too generic");
+  }
+  const sum=await fetchJSON("https://en.wikipedia.org/api/rest_v1/page/summary/"+encodeURIComponent(title),7000);
+  const extract=(sum && (sum.extract||sum.description))||excerpt;
+  if(!extract) throw new Error("empty");
+  return title+": "+extract.replace(/\s+/g," ").trim();
+}
+async function askLive(userText){
+  const prompt="You are TRACE, a student-safe helper. Answer the user's question clearly and correctly in 2-6 short sentences. If it is math, give the exact result. If it is a fact, be accurate. You may also use these dashboard facts when relevant: 350M t plastic waste/year; 1-2M t to ocean; Asia ~56% of latest published inventory; Earth Action 2026 mismanaged ~72Mt; top records: "+snapshotFacts()+". No adult topics. Question: "+userText;
+  const url="https://text.pollinations.ai/"+encodeURIComponent(prompt)+"?model=openai&seed="+Date.now();
+  const text=String(await fetchJSON(url,8000)||"").trim();
+  if(!text || /api key|budget|queue full|"error"/i.test(text)) throw new Error("blocked");
+  return text.slice(0,1100);
+}
+async function duckAnswer(userText){
+  const data=await fetchJSON("https://api.duckduckgo.com/?q="+encodeURIComponent(userText)+"&format=json&no_html=1&skip_disambig=1",7000);
+  if(!data || typeof data!=="object") throw new Error("ddg");
+  const text=(data.AbstractText||data.Answer||"").replace(/\s+/g," ").trim();
+  if(text) return text;
+  if(data.RelatedTopics && data.RelatedTopics[0] && data.RelatedTopics[0].Text) return String(data.RelatedTopics[0].Text).replace(/\s+/g," ").trim();
+  throw new Error("empty");
+}
+async function dictAnswer(userText){
+  const word=(userText.toLowerCase().match(/(?:meaning of|define|definition of|what does)\s+([a-z-]+)|what is a(?:n)?\s+([a-z-]+)/i)||[])[1] || (userText.trim().split(/\s+/).length===1?userText.trim():"");
+  if(!word || word.length<3) throw new Error("no word");
+  const data=await fetchJSON("https://api.dictionaryapi.dev/api/v2/entries/en/"+encodeURIComponent(word),7000);
+  const first=Array.isArray(data)?data[0]:null;
+  const def=first && first.meanings && first.meanings[0] && first.meanings[0].definitions && first.meanings[0].definitions[0] && first.meanings[0].definitions[0].definition;
+  if(!def) throw new Error("no def");
+  return word+": "+def;
+}
+async function countryFact(userText){
+  const m=userText.match(/capital of\s+(.+)|(.+?)\s+capital/i);
+  const name=(m && (m[1]||m[2])||"").replace(/[?.!]/g,"").trim();
+  if(!name || name.length<3) throw new Error("no country");
+  const data=await fetchJSON("https://restcountries.com/v3.1/name/"+encodeURIComponent(name)+"?fields=name,capital,region,population",7000);
+  const row=Array.isArray(data)?data[0]:null;
+  if(!row) throw new Error("no country");
+  const cap=(row.capital&&row.capital[0])||"unknown";
+  return (row.name && row.name.common?row.name.common:name)+" — capital: "+cap+". Region: "+(row.region||"n/a")+". Population: "+(row.population?row.population.toLocaleString("en-IN"):"n/a")+".";
+}
+async function ask(text){
+  const t=String(text||"").trim();
+  if(!t) return;
+  if(busy){
+    addMsg("One moment — finishing the last answer, then I will take this.", "bot");
+    const wait=()=>new Promise(r=>setTimeout(r,350));
+    for(let i=0;i<20 && busy;i++) await wait();
+    if(busy){ busy=false; stopTyping(); setStatus("COASTAL DATA ASSISTANT • ONLINE",false); input.disabled=false; }
+  }
+  busy=true;
+  addMsg(t,"user");
+  typing();
+  setStatus("THINKING…",true);
+  input.disabled=true;
+  try{
+    const local=answerLocal(t);
+    let final=local.strong?local:null;
+    if(!final){
+      const qLookup=local.lookup?waterLookupQuery(t):t;
+      const note=local.lookup?"\n\nNote: this is a public encyclopedia/lookup note, not a live lab meter. TRACE does not have a pollution sensor for every lake, city and ocean. If a number is missing, the honest answer is that no live reading is on this page.":"";
+      function onTopic(text){
+        const a=String(text||"").toLowerCase();
+        const keys=tidyAsk(t).split(/[^a-z0-9]+/).filter(w=>w.length>3 && !/^(which|what|does|this|that|from|with|have|world|amount|most)$/.test(w));
+        const hit=keys.filter(w=>a.includes(w)).length;
+        if(/simpsons|treehouse of horror|episode of the|season of the american animated/.test(a)) return false;
+        if(keys.includes("plastic") || keys.includes("pollution") || keys.includes("country")){
+          return /plastic|pollut|waste|ocean|country|india|emission|sewage|lake|coast/.test(a);
+        }
+        return hit>=1;
+      }
+      const wrap=p=>p.then(text=>{
+        if(!onTopic(text)) throw new Error("off topic");
+        return {ok:true,text:text+note,next:SUGGEST};
+      });
+      const tries=[];
+      tries.push(wrap(wikiAnswer(qLookup)));
+      tries.push(wrap(duckAnswer(qLookup)));
+      tries.push(wrap(askLive(t)));
+      if(!local.lookup){
+        tries.push(dictAnswer(t).then(text=>({ok:true,text:text,next:SUGGEST})));
+        tries.push(countryFact(t).then(text=>({ok:true,text:text,next:SUGGEST})));
+      }
+      final=await Promise.any(tries).catch(()=>null);
+    }
+    if(!final) final=local.ok && local.text?local:{ok:true,text: local.lookup ? "I do not have a live pollution meter for that lake, city or coast. TRACE only stores published Mumbai-coast notes plus country plastic shares. For any other place I can look up a public description when the network works — I will not invent a number." : "I can still help. Try math such as “what is 1+12”, a country name (India, Philippines, Brazil), or a topic like microplastics, rivers or recycling.",next:["Water pollution level in Mumbai","Top 10 countries","What does this measure?"]};
+    stopTyping();
+    addMsg(final.text,"bot");
+    showSuggest(final.next||SUGGEST);
+  }catch(err){
+    stopTyping();
+    const math=safeMath(t);
+    addMsg(math? (math.expr+" = "+math.value) : "I am still here. Ask math (1+12), a country, a city, or a topic like microplastics, rivers or recycling.","bot");
+    showSuggest(["What is 1+12","Top 10 countries","Tell me about India"]);
+  }finally{
+    busy=false;
+    input.disabled=false;
+    setStatus("COASTAL DATA ASSISTANT • ONLINE",false);
+    input.focus();
+  }
+}
+function sendNow(){
+  const v=(input.value||"").trim();
+  if(!v){
+    input.focus();
+    if(!log.querySelector(".hint-empty")){
+      const d=document.createElement("div");
+      d.className="msg bot hint-empty";
+      d.textContent="Type a question first, then press GO. Try “India” or “What are microplastics?”.";
+      log.appendChild(d); log.scrollTop=log.scrollHeight;
+    }
+    return;
+  }
+  input.value="";
+  ask(v);
+}
+form.addEventListener("submit",e=>{
+  e.preventDefault();
+  e.stopPropagation();
+  sendNow();
+});
+document.getElementById("assistGo").addEventListener("click",e=>{
+  e.preventDefault();
+  e.stopPropagation();
+  sendNow();
+});
+input.addEventListener("keydown",e=>{
+  if(e.key==="Enter"){ e.preventDefault(); sendNow(); }
+});
+addMsg("TRACE is working. Ask a country, compare two places, try math such as 1+12, or tap a chip below.","bot");
+showSuggest(SUGGEST);
+setStatus("COASTAL DATA ASSISTANT • ONLINE",false);
+(function(){
+  const screen=document.getElementById("bootScreen");
+  function enterApp(){
+    if(!document.body.classList.contains("boot")) return;
+    document.body.classList.remove("boot");
+    if(screen){
+      screen.classList.add("off");
+      setTimeout(()=>screen.remove(),560);
+    }
+  }
+  const go=document.getElementById("bootEnter");
+  const skip=document.getElementById("bootSkip");
+  if(go) go.addEventListener("click",enterApp);
+  if(skip) skip.addEventListener("click",enterApp);
+  document.addEventListener("keydown",e=>{
+    if(!document.body.classList.contains("boot")) return;
+    if(e.key==="Enter" || e.key===" "){ e.preventDefault(); enterApp(); }
+  });
+})();
+</script>
+</body>
+</html>
